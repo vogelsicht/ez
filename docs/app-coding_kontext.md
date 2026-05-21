@@ -94,22 +94,26 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 
 ---
 
-## Designentscheide (Stand S0)
+## Designentscheide
 
-(Initial leer — wird mit jedem realen Patch-Lauf gefüllt. Beispiel-Format aus FB-Setup:)
+### S1 Designentscheide
 
-```markdown
-### Sprint X Designentscheide
-
-1. **{Title}** (U1). {Was wurde entschieden, warum, was war die Alternative.}
-2. ...
-```
+1. **Identity-Modal Empty-State: Inline-Add statt Settings-Tab** (Phase-A-Quickfix für BUG-001). Entschieden: `+ Person anlegen`-Eingabe direkt im Identity-Modal-Body, neuer Helper `identityAddPersonAndSelect(name)` der `addPerson()` + `setCurrentUser()` + `closeModal()` kombiniert. Alternative wäre voller Settings-Tab gewesen — abgelehnt weil das Architektur-Eskalation gebraucht hätte (mehrere Settings-Bereiche, Tab-Position, A11-Config-vs-Daten-Schnitt). Quickfix ist reversibel und blockiert keine spätere Settings-Architektur in Phase B.
 
 ---
 
 ## Mitnahmen für nächste Session
 
-(Initial leer — wird in S1 mit Erkenntnissen aus dem ersten Code-Lauf gefüllt.)
+### Offen am Ende S1
+
+- **Smoke-Test Live-URL noch ausstehend.** Nach Pages-Sync (~30s) prüfen: `https://vogelsicht.github.io/ez/ez-cockpit.html` — 5 Punkte aus briefing_S1_setup.md: Console-Errors, Identity-Modal (jetzt mit Inline-Add), Test-Task, Co-Lead-Antwort, Footer `v0.1b.2026-05-21`.
+- **4 Strategie-Themen eskaliert** (siehe MASTER.md → "Eskalations-Bedarf für Strategie-Chat"): Einstellungen-Mapping, Multi-Projekt-Views, Ressourcenplanung-Monitoring, Logbook-Erweiterung. Alle Phase-B-Discovery-Material, nicht Code-Modus.
+
+### Lessons aus S1
+
+- **B6 funktioniert wie spezifiziert.** Alle 5 erwarteten Zeilen aus dem Briefing waren exakt da wo angekündigt (6, 1899, 1904, 1917, 9465). Kein Drift.
+- **`addPerson()` existierte schon** und persistiert sauber via `(ROOT_NODE + '/' + 'persons')` — A12-konform. Wiederverwendung statt Neubau: Phase-A-Quickfix nutzt nur 1 neue Helper-Funktion (`identityAddPersonAndSelect`), kein neues Datenmodell.
+- **Identity-Modal-Body ist ein Template-Literal mit nested `${cur ? ... : ''}`-Ausdrücken.** `str_replace` funktionierte hier sauber ohne Acorn (A4 nicht nötig), weil der Block exakt eindeutig war. Bei grösseren Refactorings in dieser Funktion ggf. Acorn nehmen.
 
 ---
 
@@ -124,6 +128,7 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 | # | Datum | Version | Highlights |
 |---|---|---|---|
 | **S0** | **2026-05-20** | 0.1.0 (Übergabe-Stand) | **Bootstrap (kein Code-Patch) · app-coding_kontext initialisiert · Erster Code-Lauf wartet auf S1 (Repo-Init + Firebase + Worker + Config-Replace + Seed-Data)** |
+| **S1** | **2026-05-21** | 0.1.0 → 0.1a → 0.1b.2026-05-21 | **Setup-Patch (firebaseConfig + ANTHROPIC_PROXY_URL + Versions-Bump) → live deployed. BUG-001 Quickfix (Identity-Modal Empty-State Onboarding via Inline-Add). 4 Strategie-Themen für Phase-B-Discovery eskaliert.** |
 
 ---
 

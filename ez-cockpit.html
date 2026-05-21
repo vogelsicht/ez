@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="app-version" content="0.1a.2026-05-21">
+<meta name="app-version" content="0.1b.2026-05-21">
 <title>Expedition Zukunft · Cockpit</title>
 
 <!-- Marken-Schrift (Darker Grotesque, via Google Fonts) -->
@@ -1896,7 +1896,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 //
 const APP_BRAND  = "Expedition Zukunft";   // Wird im Header und in JSON-Export verwendet
 const APP_SLUG   = "ez";                    // Filename-Prefix für CSV/JSON-Exporte
-const APP_VERSION = "0.1a.2026-05-21";       // Wird im Footer angezeigt
+const APP_VERSION = "0.1b.2026-05-21";       // Wird im Footer angezeigt
 const ROOT_NODE  = "ezcockpit";             // Firebase root-Knoten (alle Daten leben hier drunter)
 const LEGACY_TIME_NODE = "ezarbeitsjournal";// Firebase root für Time-Tracking (separat, für künftige Migration)
 
@@ -1980,6 +1980,16 @@ function setDailyHours(h) {
   } catch(e) {}
 }
 const DAILY_HOURS_DEFAULT = 8.4;
+
+// Phase-A-Quickfix für BUG-001: aus Empty-State heraus Onboarding ermöglichen,
+// ohne separaten Settings-Tab vorwegzunehmen. Volle Settings-Architektur folgt in Phase B.
+function identityAddPersonAndSelect(name) {
+  name = (name || '').trim();
+  if (!name) return;
+  addPerson(name);
+  setCurrentUser(name);
+  closeModal('identityModal');
+}
 
 // ============ HOURS HELPERS ============
 // Parser akzeptiert: "2.5h", "2,5h", "2.5", "2,5", "2h30", "2h30min", "2:30", "30min"
@@ -2070,7 +2080,18 @@ function openIdentityModal() {
   document.getElementById("identityModalBody").innerHTML = `
     <div style="margin-bottom:14px">
       <div class="section-label" style="margin-top:0">Wer arbeitet hier?</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px">${opts}</div>
+      ${persons.length === 0
+        ? `<div style="font-size:12px;color:var(--app-text-muted);margin-bottom:8px">Noch keine Personen im Team. Lege die erste Person an, um zu starten.</div>`
+        : `<div style="display:flex;flex-wrap:wrap;gap:4px">${opts}</div>`}
+      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap">
+        <input type="text" id="identityNewPersonInput" placeholder="Name eingeben…"
+               style="font-size:12px;padding:4px 8px;flex:1;min-width:140px"
+               onkeydown="if(event.key==='Enter'){identityAddPersonAndSelect(this.value)}">
+        <button class="btn btn-sm btn-primary"
+                onclick="identityAddPersonAndSelect(document.getElementById('identityNewPersonInput').value)">
+          + Person anlegen
+        </button>
+      </div>
       <div style="font-size:11px;color:var(--app-text-muted);margin-top:6px">
         Identität wird lokal im Browser gespeichert. Default-Owner für neue Aufgaben + persönliche KI-Verlauf-Trennung.
         ${cur ? `<button class="btn btn-sm btn-danger" style="margin-left:8px" onclick="setCurrentUser(null); closeModal('identityModal');">Abmelden</button>` : ''}
@@ -9462,7 +9483,7 @@ db.ref((ROOT_NODE + '/' + 'lists')).once("value", snap => {
 </div>
 
 <div style="text-align:center;padding:12px 20px;font-size:10px;color:var(--app-text-muted);border-top:1px solid var(--app-border);margin-top:20px">
-  Expedition Zukunft · Cockpit · v0.1a.2026-05-21
+  Expedition Zukunft · Cockpit · v0.1b.2026-05-21
 </div>
 </body>
 </html>

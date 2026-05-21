@@ -31,8 +31,8 @@ Plus **Inbox-Workflow** für Transkript-Import (Meeting → LLM → strukturiert
 
 | File | Version | Zuletzt geändert | Status |
 |---|---|---|---|
-| `ez-cockpit.html` | `0.1.0` | 2026-05-20 (Übergabe von ZFSG-Fork, S0) | placeholders für Firebase/Worker, **noch nicht live** |
-| (Cloudflare Worker) | — | — | wird in Phase A S1 angelegt |
+| `ez-cockpit.html` | `0.1b.2026-05-21` | 2026-05-21 (S1) | live deployed via GitHub Pages, Firebase + Worker verbunden, Identity-Onboarding Quickfix |
+| (Cloudflare Worker) | live | 2026-05-21 (vor S1) | `vogelsicht-ez.holy-forest-0174.workers.dev`, Anthropic-Secret gesetzt |
 
 ---
 
@@ -119,22 +119,28 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 
 ### 🐛 Bug-Register
 
-**Offen:** keine bekannt (S0).
-**Abgeschlossen:** —
+**Offen:** keine bekannt.
 
-> Nächste Bug-Nummer: **BUG-001**
+**Abgeschlossen:**
+
+| # | Titel | Gefunden | Behoben | Notiz |
+|---|---|---|---|---|
+| BUG-001 | Identity-Modal Empty-State: leere Personen-Liste, kein Onboarding aus Empty-State heraus | S1 Smoke-Test (2026-05-21) | S1 Quickfix v0.1b.2026-05-21 | `+ Person anlegen`-Inline-Eingabe im Modal. Volle Settings-Architektur folgt in Phase B. A10/DP11-Verstoss aus Übergabe-Code. |
+
+> Nächste Bug-Nummer: **BUG-002**
 
 ### 📋 Backlog (zentral)
 
 #### Phase A · Demo Sprint
-- [ ] **BL-001** Firebase-Projekt anlegen (`ez-cockpit-demo`, europe-west1) + Test-Mode-Rules
-- [ ] **BL-002** Cloudflare Worker als Anthropic-Proxy deployen + API-Key als Secret setzen
-- [ ] **BL-003** GitHub-Repo anlegen + GitHub Pages aktivieren
-- [ ] **BL-004** `firebaseConfig` + `ANTHROPIC_PROXY_URL` in `ez-cockpit.html` ersetzen
+- [x] **BL-001** Firebase-Projekt anlegen (`vogelsicht-ez`, europe-west1) + Test-Mode-Rules ✅ vor S1
+- [x] **BL-002** Cloudflare Worker als Anthropic-Proxy deployen + API-Key als Secret setzen ✅ vor S1
+- [x] **BL-003** GitHub-Repo anlegen + GitHub Pages aktivieren ✅ vor S1 (`vogelsicht/ez`)
+- [x] **BL-004** `firebaseConfig` + `ANTHROPIC_PROXY_URL` in `ez-cockpit.html` ersetzen ✅ S1
 - [ ] **BL-005** Plausible EZ-Seed-Data: 3–4 Phasen, 15–20 Tasks, 10–15 Kontakte, 2–3 Meetings/Logs (aus expeditionzukunft.ch + LinkedIn-Recherche)
 - [ ] **BL-006** Pre-Pitch-Preview mit Kunden-Tech-Lead (15min Call, Feedback einarbeiten)
 - [ ] **BL-007** Backup-Plan: lokales Demo-Video falls Worker während Pitch streikt
 - [ ] **BL-008** Pitch-Notizen + Talking Points (technisch + Service-Modell + Preise)
+- [ ] **BL-009** Smoke-Test live nach S1-Quickfix abschliessen (Identity/Task/Co-Lead/Footer)
 
 #### Phase B · Discovery (wartet auf Auftrag)
 - [ ] **BL-010** Firebase Auth-Layer entscheiden (Email/Password vs. Google-SSO vs. Magic-Link)
@@ -155,7 +161,16 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 - [ ] **BL-032** Slack-Integration für Notifications
 - [ ] **BL-033** White-Label-Refactor: zweiter Kunde mit eigenem `APP_BRAND`/`ROOT_NODE`/`:root`
 
-> Nächste BL-Nummer: **BL-009** (Phase A) / **BL-016** (Phase B) / **BL-023** (Phase C) / **BL-034** (Phase D)
+> Nächste BL-Nummer: **BL-010** (Phase A) / **BL-016** (Phase B) / **BL-023** (Phase C) / **BL-034** (Phase D)
+
+#### Eskalations-Bedarf für Strategie-Chat (aus S1 Smoke-Test-Feedback Osi, 2026-05-21)
+
+Folgende vier Themen sind Architektur-/Strategie-Entscheide, gehören NICHT in Code-Modus, sondern in den nächsten Strategie-Chat (Phase-B-Discovery-Material):
+
+1. **Einstellungen-Tab + Mapping** — welche Config gehört in einen Settings-Tab (Team-Members, Brand-Config, Tag-Library, Defaults?). A11-Configuration-First-Check beim Schnitt Config vs. Daten.
+2. **Multi-Projekt-Views (EZ global / Projekt A / B)** — fundamentale `ROOT_NODE`-Architekturfrage: ist ein Projekt ein Firebase-Subnode oder eine Property an Tasks/CRM/Logs? Cross-Projekt-Views? Berührt BL-022 (Phase C) und wandert ggf. nach vorne.
+3. **Ressourcenplanung als Monitoring** — neues Datenmodell (Budgets), neue Joins (Tasks ↔ Budget, Zeiten ↔ Budget), neue Views Budget-vs-Ist. Eigenes Feature-Modul.
+4. **Logbook-Erweiterung** — bisheriges Logbook + Agenda-Setting für bevorstehende Meetings + Entscheidungs-Logbook (gibt's separat unter Cockpit, sollte zusammengeführt werden).
 
 ---
 
@@ -280,6 +295,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 | # | Datum | Chat-Typ | Fokus | Outcome |
 |---|---|---|---|---|
 | **S0** | 2026-05-20 | Strategie (Bootstrap) | Übergabe-Doc analysiert, FB-Setup-Patterns übernommen, 7 Doku-Files generiert, Phase-Plan ratifiziert | EZ-Cockpit-Projekt initialisiert; Phase A startbereit; nächstes: S1 Demo-Sprint-Kickoff |
+| **S1** | 2026-05-21 | App-Coding | Setup-Patch (Firebase + Worker live, Version-Bump 0.1.0 → 0.1a → 0.1b), BUG-001 (Identity-Modal Empty-State) Quickfix | App live auf GitHub Pages; Firebase `vogelsicht-ez` + Worker `holy-forest-0174` verbunden; Identity-Onboarding aus Empty-State funktioniert; 4 Strategie-Themen für Phase-B-Discovery eskaliert |
 
 ---
 
@@ -288,6 +304,8 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 | Version | Datum | Major Changes |
 |---|---|---|
 | 0.1.0 | 2026-05-20 | Initial: Fork aus ZFSG v3.19, Finanzen raus, EZ-Branding, Service-Produkt-Konfiguration extrahiert. Placeholders für Firebase/Worker. |
+| 0.1a.2026-05-21 | 2026-05-21 | S1 Setup-Patch: Firebase-Config (`vogelsicht-ez`, europe-west1) + Worker-URL eingesetzt, Versions-Schema-Migration. Erste Live-Version auf GitHub Pages. |
+| 0.1b.2026-05-21 | 2026-05-21 | S1 BUG-001-Quickfix: Identity-Modal Empty-State Onboarding (`+ Person anlegen` inline im Modal). Phase-A-Notlauf-konform, keine Settings-Architektur vorweggenommen. |
 
 ---
 

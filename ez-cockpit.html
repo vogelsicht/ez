@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="app-version" content="0.1.0">
+<meta name="app-version" content="0.1a.2026-05-21">
 <title>Expedition Zukunft · Cockpit</title>
 
 <!-- Marken-Schrift (Darker Grotesque, via Google Fonts) -->
@@ -1896,25 +1896,25 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 //
 const APP_BRAND  = "Expedition Zukunft";   // Wird im Header und in JSON-Export verwendet
 const APP_SLUG   = "ez";                    // Filename-Prefix für CSV/JSON-Exporte
-const APP_VERSION = "0.1.0";                // Wird im Footer angezeigt
+const APP_VERSION = "0.1a.2026-05-21";       // Wird im Footer angezeigt
 const ROOT_NODE  = "ezcockpit";             // Firebase root-Knoten (alle Daten leben hier drunter)
 const LEGACY_TIME_NODE = "ezarbeitsjournal";// Firebase root für Time-Tracking (separat, für künftige Migration)
 
 // --- Firebase Config (aus Firebase-Console, "Project Settings → SDK setup") ---
 const firebaseConfig = {
-  apiKey:            "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
-  authDomain:        "REPLACE.firebaseapp.com",
-  databaseURL:       "https://REPLACE-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId:         "REPLACE",
-  storageBucket:     "REPLACE.firebasestorage.app",
-  messagingSenderId: "REPLACE",
-  appId:             "REPLACE"
+  apiKey:            "AIzaSyCpK9UnAxORnSYi1f1Ka_zs7tmZreMM7k8",
+  authDomain:        "vogelsicht-ez.firebaseapp.com",
+  databaseURL:       "https://vogelsicht-ez-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "vogelsicht-ez",
+  storageBucket:     "vogelsicht-ez.firebasestorage.app",
+  messagingSenderId: "255800511020",
+  appId:             "1:255800511020:web:a5ef158abd3d1a14d91f89"
 };
 
 // --- Cloudflare Worker als Anthropic-API-Proxy ---
 // Setup: deploy worker.js zu Cloudflare Workers (Free Tier reicht),
 // dann ANTHROPIC_API_KEY als Worker-Secret hinterlegen.
-const ANTHROPIC_PROXY_URL = "https://REPLACE-proxy.workers.dev";
+const ANTHROPIC_PROXY_URL = "https://vogelsicht-ez.holy-forest-0174.workers.dev";
 const ANTHROPIC_MODEL     = "claude-sonnet-4-20250514";
 //
 //  >>>  K O N F I G U R A T I O N S - E N D E  <<<
@@ -9462,7 +9462,7 @@ db.ref((ROOT_NODE + '/' + 'lists')).once("value", snap => {
 </div>
 
 <div style="text-align:center;padding:12px 20px;font-size:10px;color:var(--app-text-muted);border-top:1px solid var(--app-border);margin-top:20px">
-  Expedition Zukunft · Cockpit · v0.1.0
+  Expedition Zukunft · Cockpit · v0.1a.2026-05-21
 </div>
 </body>
 </html>

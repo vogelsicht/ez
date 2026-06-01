@@ -140,7 +140,13 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 - [ ] **BL-006** Pre-Pitch-Preview mit Kunden-Tech-Lead (15min Call, Feedback einarbeiten)
 - [ ] **BL-007** Backup-Plan: lokales Demo-Video falls Worker während Pitch streikt
 - [ ] **BL-008** Pitch-Notizen + Talking Points (technisch + Service-Modell + Preise)
-- [ ] **BL-009** Smoke-Test live nach S1-Quickfix abschliessen (Identity/Task/Co-Lead/Footer)
+- [x] **BL-009** Smoke-Test nach S1-Quickfix ✅ teilweise abgeschlossen (S1):
+  - ✅ Punkt 1 Console-Errors: 0 errors
+  - ✅ Punkt 2 Identity-Modal: Inline-Input + Button gerendert, Helper-Flow (`identityAddPersonAndSelect`) verifiziert (idempotent + setCurrentUser + Modal-close)
+  - ⏸ Punkt 3 Task anlegen: nicht ausgeführt (Firebase-Write → Demo-DB-Verschmutzung → User-Entscheidung)
+  - ⏸ Punkt 4 Co-Lead-Chat: nicht ausgeführt (Anthropic-Tokens-Kosten → User-Entscheidung); Worker erreichbar (HTTP 405 für GET, 200 für OPTIONS-Preflight = sauber)
+  - ✅ Punkt 5 Footer: v0.1b.2026-05-21 live verifiziert (WebFetch auf vogelsicht.github.io/ez/ez-cockpit.html)
+  - Bonus ✅ Firebase Read-Probe (`db.ref(ROOT_NODE).once('value')`): topLevel-Keys `lists, persons, phases, tagLibrary`
 
 #### Phase B · Discovery (wartet auf Auftrag)
 - [ ] **BL-010** Firebase Auth-Layer entscheiden (Email/Password vs. Google-SSO vs. Magic-Link)

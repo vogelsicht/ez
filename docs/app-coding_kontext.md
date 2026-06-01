@@ -106,8 +106,9 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 
 ### Offen am Ende S1
 
-- **Smoke-Test Live-URL noch ausstehend.** Nach Pages-Sync (~30s) prüfen: `https://vogelsicht.github.io/ez/ez-cockpit.html` — 5 Punkte aus briefing_S1_setup.md: Console-Errors, Identity-Modal (jetzt mit Inline-Add), Test-Task, Co-Lead-Antwort, Footer `v0.1b.2026-05-21`.
+- **Smoke-Test 3 von 5 Punkten + 1 Bonus grün, 2 bewusst offen** (siehe MASTER.md BL-009): 1/2/5 + FB-Read OK. Punkt 3 (Task-Anlage = FB-Write) und Punkt 4 (Co-Lead = Anthropic-Tokens) wurden bewusst nicht ausgeführt — Demo-DB-Verschmutzung bzw. Token-Kosten sind User-Entscheidungen, sollte Osi vor dem Pitch einmal manuell durchspielen. Worker-Erreichbarkeit indirekt verifiziert (OPTIONS-Preflight HTTP 200 auf `/v1/messages`).
 - **4 Strategie-Themen eskaliert** (siehe MASTER.md → "Eskalations-Bedarf für Strategie-Chat"): Einstellungen-Mapping, Multi-Projekt-Views, Ressourcenplanung-Monitoring, Logbook-Erweiterung. Alle Phase-B-Discovery-Material, nicht Code-Modus.
+- **Smoke-Test-Infrastruktur:** `~/.claude/launch.json` (user-level) enthält jetzt einen Eintrag `ez-cockpit-static` (Python-HTTP-Server auf Port 8765 mit `--directory /Users/ohkt/Desktop/ez_cockpit`). Bewusst global statt im Repo, weil das Preview-Tool nur user-level `~/.claude/launch.json` liest. Für künftige Smoke-Test-Wiederholungen wiederverwendbar. Bei späterer Repo-Bereinigung beachten.
 
 ### Lessons aus S1
 

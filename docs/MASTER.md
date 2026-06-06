@@ -136,7 +136,8 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 - [x] **BL-002** Cloudflare Worker als Anthropic-Proxy deployen + API-Key als Secret setzen ✅ vor S1
 - [x] **BL-003** GitHub-Repo anlegen + GitHub Pages aktivieren ✅ vor S1 (`vogelsicht/ez`)
 - [x] **BL-004** `firebaseConfig` + `ANTHROPIC_PROXY_URL` in `ez-cockpit.html` ersetzen ✅ S1
-- [ ] **BL-005** Plausible EZ-Seed-Data: 3–4 Phasen, 15–20 Tasks, 10–15 Kontakte, 2–3 Meetings/Logs (aus expeditionzukunft.ch + LinkedIn-Recherche)
+- [ ] **BL-005** Pitch-Features v0.2.0 + EZ-Seed gemäss `docs/briefing_S2_pitch_features.md` Etappe 1: Auth (E-Mail/Passwort), Settings-Tab, Resource-Planning-Pivot (Person × Kategorie × Woche), 8 EZ-Personen, Projekt-Hierarchie aus Salimata Screenshot, Auftrags-Rentabilitäts-Sicht (manuell). Eigenständig vorzeigbar nach Abschluss.
+- [ ] **BL-005b** Pitch-Features v0.2a gemäss `docs/briefing_S2_pitch_features.md` Etappe 2: Clockify-API-Integration via Worker, Cron-Auto-Sync alle 2h, Manual-Sync-Button, TimeEntry-projectId-Verdrahtung, Auftrags-Rentabilität-Auto. Voraussetzung: BL-005 abgeschlossen.
 - [ ] **BL-006** Pre-Pitch-Preview mit Kunden-Tech-Lead (15min Call, Feedback einarbeiten)
 - [ ] **BL-007** Backup-Plan: lokales Demo-Video falls Worker während Pitch streikt
 - [ ] **BL-008** Pitch-Notizen + Talking Points (technisch + Service-Modell + Preise)
@@ -171,12 +172,12 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 
 #### Eskalations-Bedarf für Strategie-Chat (aus S1 Smoke-Test-Feedback Osi, 2026-05-21)
 
-Folgende vier Themen sind Architektur-/Strategie-Entscheide, gehören NICHT in Code-Modus, sondern in den nächsten Strategie-Chat (Phase-B-Discovery-Material):
+Folgende vier Themen sind Architektur-/Strategie-Entscheide, die in Strategie-Sessions adressiert werden:
 
-1. **Einstellungen-Tab + Mapping** — welche Config gehört in einen Settings-Tab (Team-Members, Brand-Config, Tag-Library, Defaults?). A11-Configuration-First-Check beim Schnitt Config vs. Daten.
-2. **Multi-Projekt-Views (EZ global / Projekt A / B)** — fundamentale `ROOT_NODE`-Architekturfrage: ist ein Projekt ein Firebase-Subnode oder eine Property an Tasks/CRM/Logs? Cross-Projekt-Views? Berührt BL-022 (Phase C) und wandert ggf. nach vorne.
-3. **Ressourcenplanung als Monitoring** — neues Datenmodell (Budgets), neue Joins (Tasks ↔ Budget, Zeiten ↔ Budget), neue Views Budget-vs-Ist. Eigenes Feature-Modul.
-4. **Logbook-Erweiterung** — bisheriges Logbook + Agenda-Setting für bevorstehende Meetings + Entscheidungs-Logbook (gibt's separat unter Cockpit, sollte zusammengeführt werden).
+1. ✅ **Einstellungen-Tab + Mapping** — in S2 entschieden: Settings-Tab kommt in Etappe 1 (Briefing S2 §2.1), enthält Tagessoll + Personen-Email-Mapping. Erweitert in Etappe 2 um Clockify-Sektion. Multi-Tenant-Schnitt: `appConfig/` (geteilt) vs. LocalStorage (Phase-A: User-Präferenzen wie Tab-State).
+2. ⏳ **Multi-Projekt-Views (EZ global / Projekt A / B)** — bleibt offen. Frage: ist ein „Projekt" ein eigener `ROOT_NODE`-Subbaum oder eine Property an Tasks/CRM/Logs? Phase-B-Discovery-Thema. Berührt BL-022.
+3. ✅ **Ressourcenplanung als Monitoring** — in S2 adressiert: neues Datenmodell (`projects/`, `personCapacity/`, `effortEstimates/`), Pivot-Tabelle Person × Kategorie × Woche, Soll/Ist-Aggregat via TimeEntry-projectId. Volldetail: `briefing_S2_pitch_features.md`.
+4. ⏳ **Logbook-Erweiterung** — bleibt offen. Logbook + Agenda-Setting + Entscheidungs-Logbook zusammenführen. Phase-B-Thema.
 
 ---
 
@@ -220,6 +221,8 @@ Folgende vier Themen sind Architektur-/Strategie-Entscheide, gehören NICHT in C
 3. **Beweisbar fehlerfrei:** Diff-Test (Prüfsumme alt vs. neu) im Code mit Rollback bei Mismatch.
 
 Bei Konflikt zwischen Eleganz und Datensicherheit: **Datensicherheit gewinnt**.
+
+**A14 · Geteilte Konfiguration lebt in `appConfig/`, nicht in LocalStorage.** LocalStorage ist OK für Geräte-/User-spezifische Präferenzen (Tab-State, kollabierte Kategorien, aktive Linse). Sobald ein Wert team-weit gelten soll (Tagessoll, Brand-Config, Festival-Start, Feature-Flags) → Firebase-Knoten `appConfig/`. Sonst hat jede:r eine eigene Wahrheit und Drift ist garantiert.
 
 ### Briefing-Regeln
 
@@ -292,7 +295,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 
 | # | Lesson | Quelle |
 |---|---|---|
-| — | — | — |
+| **L1** | Bei Vorlagen-Übernahme aus anderem Projekt nicht auf Annahmen über fremden Code verlassen. Auch ein gut geschriebener Handover-Report ist sekundäre Quelle — die echte HTML ist die Wahrheit. In S2 entdeckt: ZFSG-Sandbox hat **kein** integriertes Person×Projekt×Woche-Soll, **kein** Personen-Kapazitäts-Modell — was Briefing-Annahmen vorher unterstellt hatten. Aufgedeckt durch Handover-Report §0 + direkten HTML-Code-Greps. Konsequenz: substanzielle Architektur-Korrektur. **Pattern:** Bei jedem Briefing, das auf einer Vorlage aufbaut, BEIDES sicherstellen — Erklärung + Quellcode-Zugriff. Niemals nur Beschreibung. | S2 (2026-06-05) |
 
 ---
 
@@ -302,6 +305,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 |---|---|---|---|---|
 | **S0** | 2026-05-20 | Strategie (Bootstrap) | Übergabe-Doc analysiert, FB-Setup-Patterns übernommen, 7 Doku-Files generiert, Phase-Plan ratifiziert | EZ-Cockpit-Projekt initialisiert; Phase A startbereit; nächstes: S1 Demo-Sprint-Kickoff |
 | **S1** | 2026-05-21 | App-Coding | Setup-Patch (Firebase + Worker live, Version-Bump 0.1.0 → 0.1a → 0.1b), BUG-001 (Identity-Modal Empty-State) Quickfix | App live auf GitHub Pages; Firebase `vogelsicht-ez` + Worker `holy-forest-0174` verbunden; Identity-Onboarding aus Empty-State funktioniert; 4 Strategie-Themen für Phase-B-Discovery eskaliert |
+| **S2** | 2026-06-05 | Strategie | Salimata-Feedback verarbeitet (zwei Inputs), ZFSG-Vorlagen-Analyse (Report + HTML), strategischer Pivot von „sb8-Port" zu „Pivot-Tabelle nach Salimatas Sheet", Briefing S2 produziert (`briefing_S2_pitch_features.md`, 2 Etappen) | Briefing übergabe-fertig an Claude Code CLI; nächstes: S3 App-Coding (Etappe 1 v0.2.0); S4 Strategie nach Salimata-Preview |
 
 ---
 

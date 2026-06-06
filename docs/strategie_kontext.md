@@ -16,30 +16,39 @@
 
 ---
 
-## ⚡ BRIEFING FÜR NÄCHSTE SESSION (S1)
+## ⚡ BRIEFING FÜR NÄCHSTE STRATEGIE-SESSION (S4 oder später)
 
-**Wo stehen wir nach S0 (Bootstrap):**
-- EZ-Cockpit-Projekt initialisiert
-- Übergabe-Doc (`EZ_COCKPIT_UEBERGABE.md`) als Skizze identifiziert; FB-Setup-Patterns als kanonische Vorlage übernommen
-- 7 Bootstrap-Docs generiert: `PROJEKT_ANWEISUNGEN.md`, `MASTER.md`, `COCKPIT.md`, `strategie_kontext.md` (dieses File), `vi_kontext.md`, `app-coding_kontext.md`, `CLAUDE.md` (für Repo-Root)
-- **Phase A · Demo Sprint** als aktive Phase definiert
-- Kunden-Tech-Lead-Pattern etabliert (siehe `PROJEKT_ANWEISUNGEN.md` §18)
-- Phase-A-Notlauf-Regel verabschiedet: in Phase A reicht B6-Check als Briefing-Minimum (siehe `PROJEKT_ANWEISUNGEN.md` §15)
-- A11 + A12 (Configuration-First + Customer-Data-Isolation) + DP10 (Customer-agnostisch by default) als Service-Produkt-Regeln eingeführt
-- DP11 Test-Self-Equals-User aus FB übernommen — gilt auch für EZ-Pilot
+> **Achtung:** S3 ist die App-Coding-Session, die Briefing S2 Etappe 1 ausführt. S4 ist die nächste Strategie-Session — voraussichtlich nach Salimata-Preview-Call.
 
-**Was als nächstes Strategie-relevant ist (priorisiert):**
+**Wo stehen wir nach S2 (Strategie, 2026-06-05):**
 
-1. **S1 Demo-Sprint-Kickoff:** konkrete Tag-für-Tag-Planung für die Pitch-Woche
-   - Tag 1-2: Repo + Firebase + Worker + GitHub Pages live (BL-001 bis BL-004)
-   - Tag 3: Plausible EZ-Seed-Data anlegen (BL-005)
-   - Tag 4: Pre-Pitch-Preview mit Kunden-Tech-Lead (BL-006)
-   - Tag 5: Polish basierend auf Feedback
-   - Tag 6: Backup-Plan + Pitch-Notizen (BL-007, BL-008)
-   - Tag 7: Pitch
-2. **EZ-Seed-Data-Strategie konkretisieren:** welche EZ-Projekte/Stakeholder zeigen wir plausibel? (Recherche-Quellen: expeditionzukunft.ch + LinkedIn + öffentliche Reports)
-3. **Pitch-Story formulieren:** drei Frames vorbereiten — (a) Service-Produkt-Logik, (b) Setup-Aufwand-vs-Mehrwert, (c) Preis-Optionen (siehe Übergabe-Doc §11)
-4. **Kunden-Tech-Lead-Touchpoint:** Wann genau wird sie eingebunden? Was zeigen wir? Welches Feedback wollen wir bekommen?
+- Salimata hat zwei Feedback-Runden geschickt, Inhalt dokumentiert in §S2-Inputs unten
+- Strategischer Pivot vollzogen: nicht ZFSG-sb8 portieren, sondern **Pivot-Tabelle nach Salimatas Sheet bauen** (anderer Workflow als ZFSG)
+- Briefing `briefing_S2_pitch_features.md` produziert: 2 Etappen, Etappe 1 = Auth + Pivot-Tabelle + EZ-Seed (Ziel v0.2.0), Etappe 2 = Clockify-Auto-Sync + Auftrags-Rentabilität (Ziel v0.2a)
+- Linsen-Feature aus sb8 bewusst geparkt (kein EZ-Bedarf für Pitch)
+- Notion-Tasks-Sync bewusst geparkt (Phase-B-Discovery-Entscheid mit Salimata)
+- Briefing wartet auf Übergabe in CLI → App-Coding-Chat
+
+**Was vor S4 erledigt sein sollte (zeitlich vor nächster Strategie-Session):**
+
+1. Briefing S2 wird via CLI ins Repo gespeichert (`docs/briefing_S2_pitch_features.md`)
+2. App-Coding-Chat S3 startet, führt Etappe 1 aus → v0.2.0 deployed
+3. Osi: Firebase Console — Authentication aktivieren, 8 EZ-User + Osi anlegen (Briefing §2.1)
+4. Salimata-Preview-Call: URL + Login-Daten an Salimata, sie probiert ihren Workflow live aus
+5. Salimata-Feedback einsammeln (mündlich/schriftlich)
+
+**Themen für S4 (nach Salimata-Preview):**
+
+1. **Salimata-Feedback-Triage:** was wird in Etappe 2 noch eingebaut, was wandert in Phase B, was wird verworfen
+2. **Notion-Tasks-Entscheid:** read-only Sync oder Tasks im Cockpit pflegen — Salimatas Antwort entscheidet
+3. **Datenschutz-Detail-Antwort vorbereiten:** Salimatas Punkt 1 (keine US-Apps, Auth, Encryption) — konkrete Antwort für formellen Pitch zum Auftrag (welche Datenverarbeiter, wo liegen Daten, EU-Region, was muss EZ prüfen)
+4. **Pitch-Story finalisieren:** drei Frames (Service-Produkt-Logik / Setup-Mehrwert / Preis) — siehe Übergabe-Doc §11
+5. **Backup-Plan:** Demo-Video lokal falls Live-Demo versagt (BL-007)
+
+**Offene Strategie-Punkte aus S1 die nach Etappe 1 wieder hochkommen:**
+
+- Multi-Projekt-Views (Eskalations-Item #2) → Phase-B-Discovery
+- Logbook-Erweiterung (Eskalations-Item #4) → Phase-B-Discovery
 
 ---
 
@@ -79,17 +88,89 @@ Strukturell 1:1 aus FinanceBird-Setup übernommen: 3-Chat-Struktur, Briefing-Wor
 
 ---
 
+## S2 Beschlüsse (bindend)
+
+### S2-1 · Strategischer Pivot — von „sb8-Port" zu „Pivot-Tabelle nach Salimatas Sheet"
+
+**Auslöser:** Code-Reality-Check der ZFSG-Sandbox (Report + HTML-Greps) deckte auf, dass sb8 zentrale Annahmen NICHT erfüllt: kein integriertes Person×Projekt×Woche-Soll, kein Personen-Kapazitäts-Modell. Der ZFSG-Stream-Wochenbudget-Mechanismus ist Person-agnostisch.
+
+**Entscheid:** EZ-Pitch-Demo baut nicht auf der sb8-Wochentabelle auf, sondern repliziert **Salimatas Sheet-Workflow** (Person-Spalten × Kategorie-Hierarchie × Monat/Woche) als Live-Pivot-Tabelle. Datenmodell ist additive Erweiterung mit `projects/`, `personCapacity/`, `effortEstimates/`. Bestehendes EZ-Datenmodell wird nicht refactored.
+
+**Konsequenz:** Volldetail in `briefing_S2_pitch_features.md` §1.
+
+### S2-2 · Auth pro User von Anfang an
+
+**Entscheid:** Firebase Auth E-Mail/Passwort wird in Phase A (Demo Sprint) implementiert, nicht erst in Phase C. Begründung: Salimatas Datenschutz-Punkt + erlaubt Personalisierung (Aufwandsplanung-Tab als Default für Salimata, Person-Identifikation aus Auth statt LocalStorage-Heuristik).
+
+**Granularität:** Phase A = Auth als Login-Gate (`auth != null → r/w`). Granulare Rules (nur eigene Spalte editierbar etc.) bleibt Phase-B-Thema.
+
+**Konsequenz:** BL-010 (Auth-Strategie Phase B) wird obsolet — Entscheid in S2 vorgegriffen. BL-021 (Settings-Panel) ebenfalls vorgegriffen, kommt in Etappe 1.
+
+### S2-3 · Clockify-Integration via Worker-Cron-Auto-Sync
+
+**Entscheid:** Clockify-API echt, nicht CSV-Import. Worker-Endpoint `/clockify/*` als Proxy (Key serverseitig als Secret), Cron-Trigger im Worker alle 2h pullt TimeEntries und schreibt nach Firebase. Manual-Sync-Button für Sofort-Bedarf.
+
+**Granularität:** Mapping (Workspace, User, Projekt) pflegt Osi initial im Settings-Tab. Salimata sieht „verbunden ja/nein" + letzten Sync-Timestamp.
+
+**Konsequenz:** API-Key lebt nur als Worker-Secret, nie im Frontend. Setup-Friction durch Cloudflare-Console akzeptiert.
+
+### S2-4 · Linsen-Feature parken
+
+**Entscheid:** sb8-Linsen-System wird in Etappe 1/2 NICHT portiert. Salimata hat es nicht angefragt; der Pitch-Kern (Pivot-Tabelle + Auftrags-Rentabilität) trägt ohne. Linsen bleiben als Phase-B+-Erweiterung verfügbar.
+
+### S2-5 · Tagessoll = 8.4h Default, editierbar
+
+**Entscheid:** Tagessoll lebt in `appConfig.tagessoll`, nicht in LocalStorage (siehe MASTER A14). Default 8.4 (ZFSG-Konvention). Editierbar im Settings-Tab — wenn EZ andere Konvention hat, ändert Osi/Salimata es einmalig.
+
+---
+
+## S2 Inputs · Salimata-Feedback (dokumentiert für Phase-B-Anschluss)
+
+### Input 1 (zu Cockpit-Preview, 2026-06-04)
+
+> „Zum Cockpit: Mega cool, danke fürs Teile! Han mir Paar Gedanke gmacht. Zwei Risike gits us Organisationsperspektive: 1. Datenschutz (?) 2. One more Plattform - also onboarding und workstreams im Team ibaue. Zum also a viable alternative zu unserem jetztige set-up ha müesstis simpel und sicher gnueg syy 🙂 Ich bin mir aktuell au am aluege wie ich unsri Needs direkt uf Notion oder unserem Google Workspace integriert werde könne, zums in bestehendi Strukture z ha. Ich schick dir trotzdem Snippets vo unserem aktuelle Modus. Aber let's talk before you spend too much time in the rabit hole - isch glaub eifacher."
+
+Plus Screenshots: (1) ihre Ressourcenplanung (Sheet, Person × Kategorie × Monat), (2) Notion-Task-Liste eines Auftrags („VIS Mission Salesx") mit Spalte „Ressourcen in Tagen".
+
+**Interpretation:** Buy/Build-Signal, nicht nur Feedback. Sie evaluiert aktiv eine Notion/GWS-native Alternative. Headline: „let's talk before you spend too much time" = gelb-bis-amber Warnung auf die Kern-These.
+
+### Input 2 (Osi-Antwort + Salimata-Reply, 2026-06-04/05)
+
+Osi an Salimata (Pitch der Bündelungs-These + Clockify-Auto-Sync-Versprechen):
+
+> „Cockpit als Interface, das eure bestehenden Apps bündelt: API mit clockify → automatischi Ziterfassig 'IST' uf euchi laufende Projekt. Aufwandsplanung-Ansicht: monitoring IST Aufwände vs euchi budgetierte Stunde. Pro KW bspw. und de chamer auno witer ufschlüssle pro Person."
+
+Plus Versprechen: KI-prompted Demo „mit sehr wenig Aufwand, wird sicherlich Fehler drinne ha, ebe s Potential ufzeige".
+
+Salimatas Antwort (gleicher Tag):
+
+> „Jetzt heds bi mir es bitzli dured! han mer au bitz gedanke mache müesse ;) 1. Dateschutz: chamer aluege und isch öppis womer uf euchne bedürfnis cha löse (kei US apps bspw., log-ins, encryptions, …) 2. was ich für euche case als de grossi vorteil gseh isch dass das cockpit als interface cha funktioniere wo euchi bestehende apps tuet bündle [...] uf dere basis chömer ja nachher mal euche case aluege ob das sinn macht oder ober ebe mit de bestehende mittel besser bedient sind :))"
+
+Plus: ZFSG hat „powerful Linsen" gerade gebaut, HTML-Datei kommt nach.
+
+**Interpretation:** Beide Risiken aus Input 1 entschärft. „Cockpit als Bündelungs-Interface" wird von Salimata selbst gespiegelt — wertvolleres Pitch-Argument geht nicht. Sie schickt ein eigenes KI-prompted Demo (echte Investition). „uf dere basis chömer aluege ob sinn macht" = Call wird Entscheidungsgespräch, nicht „mal schauen".
+
+**Erkennbare EZ-Anforderungen (für Phase-B-Discovery sortiert):**
+- Clockify-API → automatische Ist-Stunden (Etappe 2 deckt das)
+- Aufwandsplanung-View mit Monitoring Ist vs. Budget pro KW + pro Person (Etappe 1+2 decken das)
+- Linsen (sb8) erwähnt — Salimata hat sie gesehen, sieht ggf. Wert. Phase-B-Check ob für EZ relevant.
+- Datenschutz-Antwort: keine US-Apps, Auth, Encryption → Firebase ist Google (US-Konzern!), das ist ein offener Punkt für Phase-B-Detail-Antwort
+
+---
+
 ## Geplante Design-Sessions (DS-Roadmap)
 
-| DS | Thema | Trigger |
-|---|---|---|
-| **DS1** | EZ-spezifische Tag-Library kuratieren (sektoren / kompetenzen / themen) | Phase B mit Kunden-Tech-Lead |
-| **DS2** | Bereiche/Areas für Tasks anpassen (EZ-Vokabular) | Phase B |
-| **DS3** | Auth-Strategie (Firebase Email/Password vs. Google-SSO vs. Magic-Link) | Phase B |
-| **DS4** | Frag-Co-Lead-Prompt-Refinement (EZ-Tonalität, Stakeholder-Begriffe) | Phase B |
-| **DS5** | Phasen-Templates für typische EZ-Sprints | Phase B |
-| **DS6** | Multi-Workspace-Architektur (mehrere parallele Sprints?) | Phase C |
-| **DS7** | White-Label-Refactor für Kunde Nr. 2 | Phase D |
+| DS | Thema | Trigger | Status |
+|---|---|---|---|
+| **DS1** | EZ-spezifische Tag-Library kuratieren (sektoren / kompetenzen / themen) | Phase B mit Salimata | ⏳ wartet |
+| **DS2** | Bereiche/Areas für Tasks anpassen (EZ-Vokabular) | Phase B | ⏳ wartet |
+| **DS3** | Auth-Strategie verfeinern (granulare Rules pro Knoten) | Phase B | ⏳ wartet (Basis-Auth in S2 entschieden) |
+| **DS4** | Frag-Co-Lead-Prompt-Refinement (EZ-Tonalität, Stakeholder-Begriffe) | Phase B | ⏳ wartet |
+| **DS5** | Phasen-Templates für typische EZ-Sprints | Phase B | ⏳ wartet |
+| **DS6** | Notion-Tasks-Sync vs. Tasks-im-Cockpit-Entscheid | Phase B Discovery mit Salimata | ⏳ wartet |
+| **DS7** | Multi-Projekt-Views Architektur (ROOT_NODE-Subbaum vs. Property) | Phase B+C | ⏳ wartet |
+| **DS8** | Datenschutz-Detail-Antwort für formellen Pitch (Firebase=Google-Konzern-Frage) | vor Auftragserteilung | ⏳ wartet |
+| **DS9** | White-Label-Refactor für Kunde Nr. 2 | Phase D | ⏳ wartet |
 
 ---
 

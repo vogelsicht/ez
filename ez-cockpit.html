@@ -1046,6 +1046,77 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 .quick-add-row.is-member .quick-add-check { color: var(--app-primary); }
 .quick-add-empty { padding: 12px 10px; font-size: 11px; color: var(--app-text-muted); text-align: center; font-style: italic; }
 /* === ENDE v3.10 === */
+
+/* ============================================================ */
+/* === S3 v0.2.0 — Login-Screen + Settings-Tab + Auth-State === */
+/* ============================================================ */
+
+/* Login-Screen Overlay (zeigt sich solange auth.currentUser === null) */
+.login-screen {
+  position: fixed; inset: 0;
+  background: var(--app-bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10000;
+  padding: 24px;
+}
+.login-screen[hidden] { display: none; }
+.login-card {
+  background: #fff;
+  border-radius: var(--app-radius);
+  border: 1px solid var(--app-border);
+  padding: 32px 28px;
+  width: 100%; max-width: 360px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.login-card .tri-bar { margin-bottom: 16px; }
+.login-card h1 { font-size: 22px; margin: 0 0 4px; font-weight: 600; }
+.login-card .login-subtitle { font-size: 12px; color: var(--app-text-muted); margin-bottom: 20px; }
+.login-card .form-group { margin-bottom: 12px; }
+.login-card label { display: block; font-size: 11px; color: var(--app-text-muted); margin-bottom: 4px; }
+.login-card input[type=email], .login-card input[type=password] {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--app-border); border-radius: 4px;
+}
+.login-card .login-error {
+  font-size: 12px; color: var(--app-danger);
+  margin: 8px 0; min-height: 16px;
+}
+.login-card .login-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.login-card .login-reset-link {
+  font-size: 11px; color: var(--app-text-muted); cursor: pointer; text-decoration: underline;
+}
+.login-card .login-reset-link:hover { color: var(--app-text); }
+.login-card button.btn-primary { padding: 8px 16px; font-size: 13px; }
+
+/* Settings-Tab Sektionen */
+.settings-section {
+  background: #fff;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.settings-section h3 {
+  font-size: 14px; font-weight: 600; margin: 0 0 12px;
+  color: var(--app-text);
+}
+.settings-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0;
+}
+.settings-row label { min-width: 140px; font-size: 12px; color: var(--app-text-muted); }
+.settings-row input[type=number], .settings-row input[type=email], .settings-row input[type=text] {
+  padding: 6px 10px; font-size: 12px;
+  border: 1px solid var(--app-border); border-radius: 4px;
+  min-width: 200px;
+}
+.settings-row .settings-hint { font-size: 11px; color: var(--app-text-muted); flex: 1; }
+.settings-banner {
+  background: #FFF6E5; border: 1px solid #F0C674;
+  padding: 10px 14px; border-radius: var(--app-radius);
+  font-size: 12px; margin-bottom: 16px;
+}
+.settings-banner.danger { background: #FFE5E5; border-color: var(--app-danger); }
 </style>
 </head>
 <body>
@@ -1083,12 +1154,13 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   <button class="nav-tab" data-tab="timetrack"><span class="sb-icon">⏱</span><span class="sb-label">Arbeitszeit</span></button>
   <button class="nav-tab" data-tab="logs"><span class="sb-icon">📒</span><span class="sb-label">Logbook</span></button>
   <button class="nav-tab" data-tab="frag" style="color:var(--app-tertiary)"><span class="sb-icon">🤖</span><span class="sb-label">KI Co-Lead</span></button>
+  <button class="nav-tab" data-tab="settings"><span class="sb-icon">⚙</span><span class="sb-label">Einstellungen</span></button>
   <div class="sb-spacer"></div>
-  <div class="sb-footer" id="sbFooter" onclick="openIdentityModal()">
+  <div class="sb-footer" id="sbFooter" onclick="switchToTab('settings')" title="Einstellungen / Mein Account">
     <div class="sb-avatar" id="sbAvatar">?</div>
     <div class="sb-avatar-info">
-      <div class="sb-avatar-name" id="sbUserName">Identität wählen</div>
-      <div class="sb-avatar-sub" id="sbUserSub">Klick zum Setzen</div>
+      <div class="sb-avatar-name" id="sbUserName">Nicht eingeloggt</div>
+      <div class="sb-avatar-sub" id="sbUserSub">—</div>
     </div>
   </div>
 </nav>
@@ -1252,6 +1324,13 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   <div id="ttsub-entries" class="ttsub-pane" style="display:none">
     <div id="entriesSubtab"></div>
   </div>
+</div>
+
+<!-- SETTINGS TAB (S3 v0.2.0) -->
+<div class="tab-content" id="tab-settings">
+  <div class="section-label" style="margin-top:0">Einstellungen</div>
+  <div id="settingsBanner"></div>
+  <div id="settingsBody"></div>
 </div>
 
 </main>
@@ -1846,16 +1925,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   </div>
 </div>
 
-<!-- IDENTITY MODAL -->
-<div class="modal-overlay" id="identityModal">
-  <div class="modal">
-    <h3>Identität & Einstellungen</h3>
-    <div id="identityModalBody"></div>
-    <div class="form-actions">
-      <button class="btn" onclick="closeModal('identityModal')">Schliessen</button>
-    </div>
-  </div>
-</div>
+<!-- Identity-Modal entfernt in S3 v0.2.0 — durch Auth + Settings-Tab ersetzt. -->
 
 <!-- INBOX-OVERLAY (Fullscreen Cards-Review) -->
 <div class="inbox-overlay" id="inboxOverlay">
@@ -1877,8 +1947,33 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   </div>
 </div>
 
+<!-- LOGIN-SCREEN (S3 v0.2.0) — sichtbar bis auth.onAuthStateChanged einen User liefert -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="tri-bar"><span style="background:var(--app-primary)"></span><span style="background:var(--app-tertiary)"></span><span style="background:var(--app-secondary)"></span></div>
+    <h1>Expedition Zukunft · Cockpit</h1>
+    <div class="login-subtitle">Anmelden mit deinem Konto.</div>
+    <form id="loginForm" onsubmit="handleLoginSubmit(event); return false">
+      <div class="form-group">
+        <label for="loginEmail">E-Mail</label>
+        <input type="email" id="loginEmail" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Passwort</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <div class="login-actions">
+        <span class="login-reset-link" onclick="handlePasswordReset()">Passwort zurücksetzen</span>
+        <button type="submit" class="btn btn-primary">Anmelden</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
 <script>
 // =================================================================
@@ -1916,12 +2011,27 @@ const firebaseConfig = {
 // dann ANTHROPIC_API_KEY als Worker-Secret hinterlegen.
 const ANTHROPIC_PROXY_URL = "https://vogelsicht-ez.holy-forest-0174.workers.dev";
 const ANTHROPIC_MODEL     = "claude-sonnet-4-20250514";
+
+// --- Admin (Service-Provider, kunden-übergreifend) ---
+// Erlaubt Bootstrap aus Empty-State: wenn diese E-Mail eingeloggt ist, aber noch keine
+// Person zugeordnet, lädt die App trotzdem und öffnet Settings-Tab zum Setup. Phase B: via
+// `personsData[name].admin = true` Flag in DB für Multi-Admin.
+const ADMIN_EMAIL = "osi@festivitas.space";
+
 //
 //  >>>  K O N F I G U R A T I O N S - E N D E  <<<
 // -----------------------------------------------------------------
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
+
+// ============ AUTH STATE (S3 v0.2.0) ============
+// Source of Truth: firebase.auth().currentUser. Diese Globals sind nur Caches für
+// schnellen synchronen Zugriff aus Render-Pfaden. Nur handleAuthChange darf sie setzen.
+let currentAuthUser = null;       // firebase.User | null
+let currentPersonName = null;     // string | null — gematcht über personsData[name].email
+let bootAppRan = false;           // verhindert doppeltes bootApp() bei Auth-State-Wechsel
 
 // ============ STATE ============
 let STATE = {
@@ -1943,6 +2053,12 @@ let STATE = {
   listFolders: {},
   logs: {},
   transcripts: {},
+  // S3 v0.2.0 — Datenmodell-Erweiterung (Briefing S2 §1.1)
+  projects: {},                // EZ-Projekt-Hierarchie (Kategorie → Sub → Leaf/Auftrag)
+  personCapacity: {},          // {personName: {YYYY-MM: {arbeitstage, ferien, kompensation}}}
+  effortEstimates: {},         // {personName: {weekKey: {projectId: {hours, note}}}}
+  appConfig: { tagessoll: 8.4 }, // geteilte Konfig (A14): Tagessoll, Feature-Flags, etc.
+  personsData: {},             // {personName: {email, …}} — Auth-Mapping
   // UI-State (lokal)
   activeLayer: null,
   invoicePreview: null,
@@ -1952,43 +2068,28 @@ let STATE = {
   showInactive: false
 };
 
-// ============ LIGHT IDENTITY (LocalStorage) ============
-// Keine echte Authentifizierung — nur eine Identitätswahl,
-// damit Default-Owner, "Meine"-Filter und KI-Verlauf personalisiert werden.
-const LS_USER_KEY = "app_current_user";
-const LS_DAILY_HOURS_KEY = "app_daily_hours";
-
-function getCurrentUser() {
-  try { return localStorage.getItem(LS_USER_KEY) || null; } catch(e) { return null; }
-}
-function setCurrentUser(name) {
-  try {
-    if (name) localStorage.setItem(LS_USER_KEY, name);
-    else localStorage.removeItem(LS_USER_KEY);
-    updateSidebarIdentity();
-  } catch(e) {}
-}
-function getDailyHours() {
-  try {
-    const v = parseFloat(localStorage.getItem(LS_DAILY_HOURS_KEY));
-    return (isNaN(v) || v <= 0) ? 8.4 : v;
-  } catch(e) { return 8.4; }
-}
-function setDailyHours(h) {
-  try {
-    if (h > 0 && h <= 24) localStorage.setItem(LS_DAILY_HOURS_KEY, String(h));
-  } catch(e) {}
-}
+// ============ IDENTITY (Firebase Auth + appConfig) ============
+// S3 v0.2.0: Identität kommt aus firebase.auth(), Tagessoll aus appConfig.tagessoll (A14).
+// Default-Owner für neue Aufgaben, "Meine"-Filter, KI-Verlauf — alles via currentPersonName.
 const DAILY_HOURS_DEFAULT = 8.4;
 
-// Phase-A-Quickfix für BUG-001: aus Empty-State heraus Onboarding ermöglichen,
-// ohne separaten Settings-Tab vorwegzunehmen. Volle Settings-Architektur folgt in Phase B.
-function identityAddPersonAndSelect(name) {
-  name = (name || '').trim();
-  if (!name) return;
-  addPerson(name);
-  setCurrentUser(name);
-  closeModal('identityModal');
+// S3 v0.2.0: getCurrentUser liefert jetzt die per-Auth gematchte Person (currentPersonName),
+// nicht mehr LocalStorage. LocalStorage-Identität ist deprecated (S2-2 Auth-Beschluss).
+// Konsumer: Default-Owner für neue Aufgaben, "Meine"-Filter, KI-Verlauf-Trennung.
+function getCurrentUser() {
+  return currentPersonName;
+}
+
+// S3 v0.2.0: Tagessoll lebt in appConfig.tagessoll (Firebase, geteilt) statt LocalStorage
+// (A14 — geteilte Konfig in appConfig). Fallback: DAILY_HOURS_DEFAULT bis appConfig geladen.
+function getDailyHours() {
+  const v = STATE.appConfig?.tagessoll;
+  return (typeof v === 'number' && v > 0 && v <= 24) ? v : DAILY_HOURS_DEFAULT;
+}
+function setDailyHours(h) {
+  const num = parseFloat(h);
+  if (!(num > 0 && num <= 24)) return Promise.reject(new Error("Tagessoll muss zwischen 0 und 24 liegen."));
+  return db.ref(ROOT_NODE + '/appConfig/tagessoll').set(num);
 }
 
 // ============ HOURS HELPERS ============
@@ -2054,61 +2155,378 @@ function getInitials(name) {
 }
 
 function updateSidebarIdentity() {
-  const user = getCurrentUser();
+  const name = currentPersonName;
+  const email = currentAuthUser?.email || null;
   const av = document.getElementById("sbAvatar");
   const nm = document.getElementById("sbUserName");
   const sb = document.getElementById("sbUserSub");
   if (!av) return;
-  if (user) {
-    av.textContent = getInitials(user);
-    nm.textContent = user;
-    sb.textContent = "aktiv · v3.12";
+  if (name) {
+    av.textContent = getInitials(name);
+    nm.textContent = name;
+    sb.textContent = email || "eingeloggt";
+  } else if (email) {
+    // Eingeloggt aber kein Person-Match — Admin oder unmapped User
+    av.textContent = email[0].toUpperCase();
+    nm.textContent = email;
+    sb.textContent = "Profil verknüpfen";
   } else {
     av.textContent = "?";
-    nm.textContent = "Identität wählen";
-    sb.textContent = "Klick zum Setzen";
+    nm.textContent = "Nicht eingeloggt";
+    sb.textContent = "—";
   }
 }
 
-function openIdentityModal() {
-  const cur = getCurrentUser();
-  const dh = getDailyHours();
-  const persons = (STATE && STATE.persons) ? STATE.persons : [];
-  const opts = persons.map(p =>
-    `<button class="btn ${p===cur?'btn-primary':''}" style="margin:2px" onclick="setCurrentUser('${p.replace(/'/g,"\\'")}'); closeModal('identityModal');">${p}</button>`
-  ).join('');
-  document.getElementById("identityModalBody").innerHTML = `
-    <div style="margin-bottom:14px">
-      <div class="section-label" style="margin-top:0">Wer arbeitet hier?</div>
-      ${persons.length === 0
-        ? `<div style="font-size:12px;color:var(--app-text-muted);margin-bottom:8px">Noch keine Personen im Team. Lege die erste Person an, um zu starten.</div>`
-        : `<div style="display:flex;flex-wrap:wrap;gap:4px">${opts}</div>`}
-      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap">
-        <input type="text" id="identityNewPersonInput" placeholder="Name eingeben…"
-               style="font-size:12px;padding:4px 8px;flex:1;min-width:140px"
-               onkeydown="if(event.key==='Enter'){identityAddPersonAndSelect(this.value)}">
-        <button class="btn btn-sm btn-primary"
-                onclick="identityAddPersonAndSelect(document.getElementById('identityNewPersonInput').value)">
-          + Person anlegen
-        </button>
+// openIdentityModal + identityAddPersonAndSelect (S1 BUG-001-Quickfix) entfernt in S3 v0.2.0
+// — Identitäts-Management läuft jetzt über Firebase Auth + Settings-Tab.
+
+// ============ AUTH FLOW (S3 v0.2.0 — Briefing S2 §2.1) ============
+
+// Login-Submit aus dem Login-Screen-Formular.
+function handleLoginSubmit(event) {
+  if (event) event.preventDefault();
+  const email = (document.getElementById('loginEmail').value || '').trim();
+  const pwd = document.getElementById('loginPassword').value || '';
+  const errEl = document.getElementById('loginError');
+  if (errEl) errEl.textContent = '';
+  if (!email || !pwd) {
+    if (errEl) errEl.textContent = 'Bitte E-Mail und Passwort eingeben.';
+    return;
+  }
+  auth.signInWithEmailAndPassword(email, pwd).catch(err => {
+    if (errEl) errEl.textContent = humanizeAuthError(err);
+  });
+}
+
+function handleLogout() {
+  auth.signOut().catch(err => alert("Logout fehlgeschlagen: " + (err.message || err)));
+}
+
+function handlePasswordReset() {
+  const email = (document.getElementById('loginEmail').value || '').trim();
+  const errEl = document.getElementById('loginError');
+  if (!email) {
+    if (errEl) errEl.textContent = 'E-Mail-Adresse oben eingeben, dann nochmal auf "Passwort zurücksetzen".';
+    return;
+  }
+  auth.sendPasswordResetEmail(email).then(() => {
+    if (errEl) {
+      errEl.style.color = 'var(--app-secondary, #2a7)';
+      errEl.textContent = 'Passwort-Reset-Mail gesendet an ' + email + '. Bitte Posteingang prüfen.';
+    }
+  }).catch(err => {
+    if (errEl) errEl.textContent = humanizeAuthError(err);
+  });
+}
+
+function humanizeAuthError(err) {
+  const code = err?.code || '';
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found')
+    return 'E-Mail oder Passwort falsch.';
+  if (code === 'auth/invalid-email') return 'E-Mail-Adresse ungültig.';
+  if (code === 'auth/too-many-requests') return 'Zu viele Versuche. Bitte später erneut probieren oder Passwort zurücksetzen.';
+  if (code === 'auth/network-request-failed') return 'Netzwerk-Fehler. Verbindung prüfen.';
+  return err?.message || 'Anmeldung fehlgeschlagen.';
+}
+
+// Match-Logik: currentAuthUser.email → currentPersonName via personsData[name].email.
+// Idempotent — kann mehrfach getriggert werden (jedes Mal wenn persons oder personsData
+// neu kommen). Setzt currentPersonName + rendert betroffene UI-Stellen.
+function tryMatchPersonName() {
+  if (!currentAuthUser) { currentPersonName = null; return; }
+  const email = (currentAuthUser.email || '').toLowerCase();
+  let match = null;
+  const pd = STATE.personsData || {};
+  for (const name of Object.keys(pd)) {
+    const e = (pd[name]?.email || '').toLowerCase();
+    if (e && e === email) { match = name; break; }
+  }
+  if (currentPersonName !== match) {
+    currentPersonName = match;
+    if (typeof updateSidebarIdentity === 'function') updateSidebarIdentity();
+    if (typeof renderSettings === 'function') renderSettings();
+  }
+  // First-time-after-bootup ohne Match: einmal auf Settings switchen
+  if (!match && currentAuthUser && !autoSwitchedSettings && bootAppRan) {
+    autoSwitchedSettings = true;
+    if (typeof switchToTab === 'function') switchToTab('settings');
+  }
+}
+
+// Falls eingeloggt ohne Person-Match: einmal automatisch auf Settings-Tab schalten,
+// damit der User entweder Mapping pflegen (Admin) oder sich abmelden kann. Nur EINMAL pro
+// Login (sonst bouncing wenn User bewusst zu anderem Tab wechselt).
+let autoSwitchedSettings = false;
+
+// Auth-State-Hook: einziger Pfad, der currentAuthUser + currentPersonName setzt.
+function handleAuthChange(user) {
+  currentAuthUser = user || null;
+  const loginScreen = document.getElementById('loginScreen');
+  if (!user) {
+    currentPersonName = null;
+    bootAppRan = false;
+    autoSwitchedSettings = false;
+    if (loginScreen) loginScreen.hidden = false;
+    if (typeof updateSidebarIdentity === 'function') updateSidebarIdentity();
+    return;
+  }
+  if (loginScreen) loginScreen.hidden = true;
+  if (!bootAppRan) {
+    bootAppRan = true;
+    bootApp();
+  } else {
+    tryMatchPersonName();
+  }
+}
+
+// bootApp läuft genau einmal pro Login (nicht pro auth-state-change). Führt Seed +
+// Firebase-Init + Tab-Restore + Migrationen aus. Vorher liefen diese am Ende des Scripts
+// top-level — das hätte mit Auth-Rules permission-denied gegeben.
+function bootApp() {
+  // Auth-Rule-Check: bei strengen Rules dürfen db.ref-Calls erst hier laufen.
+  seedDefaults();
+  initFirebase();
+  restoreLastTab();
+  // Sub-Tab "Erfassen" als Default
+  setTimeout(() => { if (typeof setTtSub === 'function') setTtSub('erfassen'); }, 100);
+  // Schema-Migrationen (idempotent, prüfen Existenz vor Write)
+  if (typeof runMigrations === 'function') runMigrations();
+  // Initial Sidebar-Avatar (zeigt zumindest Email bis Person-Match aus Listener kommt)
+  if (typeof updateSidebarIdentity === 'function') updateSidebarIdentity();
+}
+
+// ============ SETTINGS-TAB RENDERER (S3 v0.2.0 — Briefing S2 §2.1 Schritt 1.3) ============
+function renderSettings() {
+  const body = document.getElementById('settingsBody');
+  const banner = document.getElementById('settingsBanner');
+  if (!body) return;
+  const email = currentAuthUser?.email || '';
+  const personName = currentPersonName;
+  const isAdmin = email && email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+  // Banner: kein Match → User muss verknüpfen
+  if (banner) {
+    if (currentAuthUser && !personName) {
+      banner.innerHTML = isAdmin
+        ? `<div class="settings-banner">Admin-Modus: dein Login ist noch keiner Person zugeordnet. Lege unten unter „Personen-Mapping" deine E-Mail-Zuordnung an, oder lade Seed-Daten.</div>`
+        : `<div class="settings-banner danger">Dein Login (${esc(email)}) ist keiner Person zugeordnet. Bitte Osi kontaktieren — oder, falls du Admin bist, unter „Personen-Mapping" verknüpfen.</div>`;
+    } else {
+      banner.innerHTML = '';
+    }
+  }
+
+  const persons = Array.isArray(STATE.persons) ? STATE.persons : [];
+  const tagessoll = getDailyHours();
+  const pd = STATE.personsData || {};
+
+  const personRows = persons.length === 0
+    ? `<div class="settings-row"><div class="settings-hint">Noch keine Personen angelegt. Seed-Daten laden (Phase A: Bereich „Seed" unten).</div></div>`
+    : persons.map(p => {
+        const e = esc(pd[p]?.email || '');
+        return `<div class="settings-row">
+          <label>${esc(p)}</label>
+          <input type="email" data-person="${esc(p)}" value="${e}" placeholder="vorname@expeditionzukunft.ch" onchange="handlePersonEmailSave(this)">
+          <span class="settings-hint">${pd[p]?.email && pd[p].email.toLowerCase() === email.toLowerCase() ? '← dein Login' : ''}</span>
+        </div>`;
+      }).join('');
+
+  body.innerHTML = `
+    <div class="settings-section">
+      <h3>Mein Account</h3>
+      <div class="settings-row">
+        <label>E-Mail</label>
+        <input type="email" value="${esc(email)}" disabled>
+        <span class="settings-hint">${personName ? '→ verknüpft mit „' + esc(personName) + '"' : (isAdmin ? 'Admin' : 'nicht verknüpft')}</span>
       </div>
-      <div style="font-size:11px;color:var(--app-text-muted);margin-top:6px">
-        Identität wird lokal im Browser gespeichert. Default-Owner für neue Aufgaben + persönliche KI-Verlauf-Trennung.
-        ${cur ? `<button class="btn btn-sm btn-danger" style="margin-left:8px" onclick="setCurrentUser(null); closeModal('identityModal');">Abmelden</button>` : ''}
+      <div class="settings-row">
+        <label>&nbsp;</label>
+        <button class="btn" onclick="handleLogout()">Abmelden</button>
       </div>
     </div>
-    <div>
-      <div class="section-label">Tag-zu-Stunden-Konversion (CH-Standard)</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="number" id="identityDailyHours" value="${dh}" step="0.1" min="1" max="24" style="width:80px"> h pro Arbeitstag
-        <button class="btn btn-sm btn-primary" onclick="setDailyHours(parseFloat(document.getElementById('identityDailyHours').value)); closeModal('identityModal');">Speichern</button>
+
+    <div class="settings-section">
+      <h3>Allgemein</h3>
+      <div class="settings-row">
+        <label>Tagessoll</label>
+        <input type="number" id="settingsTagessoll" step="0.1" min="1" max="24" value="${tagessoll}">
+        <button class="btn btn-sm btn-primary" onclick="handleTagessollSave()">Speichern</button>
+        <span class="settings-hint">Stunden pro Arbeitstag. Geteilte Konfiguration in <code>appConfig.tagessoll</code>.</span>
       </div>
-      <div style="font-size:11px;color:var(--app-text-muted);margin-top:6px">
-        Standard: 8.4h pro Tag (= 42h/Woche, Kanton-ZH-Konvention). Wird für die Migration alter <code>estimatedDays</code>-Felder und Tag↔Stunden-Anzeigen verwendet.
+    </div>
+
+    <div class="settings-section">
+      <h3>Personen-Mapping (Auth ↔ Person)</h3>
+      <div class="settings-hint" style="margin-bottom:8px">Jede Person bekommt ihre Firebase-Auth-E-Mail zugeordnet. Pflege das initial einmal, danach matcht der Login automatisch.</div>
+      ${personRows}
+    </div>
+
+    <div class="settings-section">
+      <h3>Seed-Daten (Phase A)</h3>
+      <div class="settings-row">
+        <span class="settings-hint">EZ-Seed: 8 Personen + Projekt-Hierarchie + Mai-Kapazität. Idempotent (überschreibt nichts).</span>
+        <button class="btn btn-sm" onclick="handleSeedEzData()" id="seedEzBtn">EZ-Seed-Daten laden</button>
       </div>
     </div>
   `;
-  openModal("identityModal");
+}
+
+// Settings: Tagessoll speichern (Bridge zu setDailyHours → Firebase).
+function handleTagessollSave() {
+  const v = parseFloat(document.getElementById('settingsTagessoll')?.value);
+  setDailyHours(v).catch(err => alert(err.message || String(err)));
+}
+
+// Settings: Person-Email speichern. Nur Felder mit Änderung schreiben.
+function handlePersonEmailSave(input) {
+  const person = input.dataset.person;
+  const email = (input.value || '').trim();
+  if (!person) return;
+  const path = ROOT_NODE + '/personsData/' + person + '/email';
+  const setter = email ? db.ref(path).set(email) : db.ref(path).remove();
+  setter.catch(err => alert("Speichern fehlgeschlagen: " + (err.message || err)));
+}
+
+// Settings: Seed-Button — Phase-A-Stub, wird in S3.2 mit echtem seedEzData() befüllt.
+function handleSeedEzData() {
+  if (typeof seedEzData === 'function') {
+    seedEzData();
+  } else {
+    alert("Seed-Funktion noch nicht aktiv — kommt mit S3.2 (Pivot-Tabelle + EZ-Seed).");
+  }
+}
+
+// runMigrations: wrappt die bestehenden one-shot DB-Migrationen die früher top-level
+// am Script-Ende liefen. Wird aus bootApp() nach erfolgreichem Login gerufen.
+function runMigrations() {
+  // --- CRM v2: Tags + Emails + ort-Aufräumung ---
+  db.ref((ROOT_NODE + '/' + 'contacts')).once("value", snap => {
+    const cs = snap.val() || {};
+    const updates = {};
+    Object.entries(cs).forEach(([id, c]) => {
+      let needsUpdate = false;
+      const upd = {...c};
+      if (c.tags && (!Array.isArray(c.tagsSektoren) || !c.tagsSektoren.length)) {
+        upd.tagsSektoren = c.tags.split(',').map(s=>s.trim()).filter(Boolean);
+        needsUpdate = true;
+      }
+      if (c.email && (!Array.isArray(c.emails) || !c.emails.length)) {
+        upd.emails = [{ address: c.email, label: '', primary: true }];
+        needsUpdate = true;
+      }
+      if (c.ort !== undefined && c.ort !== null) {
+        upd.ort = null;
+        needsUpdate = true;
+      }
+      if (needsUpdate) updates[id] = upd;
+    });
+    if (Object.keys(updates).length) {
+      Object.entries(updates).forEach(([id, data]) => {
+        const safeUpd = {
+          tagsSektoren: data.tagsSektoren || [],
+          emails: data.emails || []
+        };
+        if (data.ort === null) safeUpd.ort = null;
+        db.ref((ROOT_NODE + '/' + 'contacts/') + id).update(safeUpd);
+      });
+      console.log('CRM-Migration v2: ' + Object.keys(updates).length + ' Kontakt(e) aktualisiert');
+    }
+  });
+
+  // --- CRM v3.0: Org-Strings → Org-Records mit orgIds ---
+  db.ref((ROOT_NODE + '/' + 'organizations')).once("value", orgSnap => {
+    const existingOrgs = orgSnap.val() || {};
+    const orgByName = {};
+    Object.entries(existingOrgs).forEach(([id, o]) => {
+      if (o.name) orgByName[o.name.toLowerCase().trim()] = id;
+    });
+
+    db.ref((ROOT_NODE + '/' + 'contacts')).once("value", cSnap => {
+      const cs = cSnap.val() || {};
+      let createdOrgs = 0;
+      let migratedContacts = 0;
+      const orgUpdates = {};
+      const contactUpdates = {};
+
+      Object.entries(cs).forEach(([cid, c]) => {
+        if (Array.isArray(c.orgIds) && c.orgIds.length) return;
+        if (!c.org || !c.org.trim()) return;
+
+        const orgNames = c.org.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+        const oids = [];
+        orgNames.forEach(orgName => {
+          const key = orgName.toLowerCase();
+          let oid = orgByName[key];
+          if (!oid) {
+            oid = 'org_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+            orgByName[key] = oid;
+            orgUpdates[oid] = {
+              name: orgName,
+              desc: '',
+              sektor: '',
+              web: '',
+              location: '',
+              notes: '',
+              created: new Date().toISOString(),
+              _migrated: true
+            };
+            createdOrgs++;
+          }
+          oids.push(oid);
+        });
+        if (oids.length) {
+          contactUpdates[cid] = oids;
+          migratedContacts++;
+        }
+      });
+
+      if (createdOrgs > 0) {
+        db.ref((ROOT_NODE + '/' + 'organizations')).update(orgUpdates);
+      }
+      if (migratedContacts > 0) {
+        Object.entries(contactUpdates).forEach(([cid, oids]) => {
+          db.ref((ROOT_NODE + '/' + 'contacts/' + (cid) + '/orgIds')).set(oids);
+        });
+      }
+      if (createdOrgs || migratedContacts) {
+        console.log(`CRM v3 Migration: ${createdOrgs} Org(s) angelegt, ${migratedContacts} Kontakt(e) verknüpft`);
+      }
+    });
+  });
+
+  // --- v3.0 Default-Smart-Lists: Gepinnte / Touchpoint / Stale ---
+  db.ref((ROOT_NODE + '/' + 'lists')).once("value", snap => {
+    const existing = snap.val() || {};
+    const hasPinned = Object.values(existing).some(l => l.type === 'smart' && l.filter?.kind === 'pinned');
+    if (!hasPinned) {
+      db.ref((ROOT_NODE + '/' + 'lists/smart_pinned')).set({
+        name: '★ Gepinnt',
+        type: 'smart',
+        filter: { kind: 'pinned' },
+        desc: 'Alle gepinnten Personen (manuell markiert)',
+        created: new Date().toISOString()
+      });
+    }
+    const hasRecent = Object.values(existing).some(l => l.type === 'smart' && l.filter?.kind === 'recent');
+    if (!hasRecent) {
+      db.ref((ROOT_NODE + '/' + 'lists/smart_recent30')).set({
+        name: 'Touchpoint < 30 Tage',
+        type: 'smart',
+        filter: { kind: 'recent', maxDays: 30 },
+        desc: 'Personen mit Kontakt in den letzten 30 Tagen',
+        created: new Date().toISOString()
+      });
+    }
+    const hasStale = Object.values(existing).some(l => l.type === 'smart' && l.filter?.kind === 'stale');
+    if (!hasStale) {
+      db.ref((ROOT_NODE + '/' + 'lists/smart_stale90')).set({
+        name: 'Lange kein Kontakt',
+        type: 'smart',
+        filter: { kind: 'stale', minDays: 90 },
+        desc: 'Personen ohne Touchpoint in 90+ Tagen',
+        created: new Date().toISOString()
+      });
+    }
+  });
 }
 
 const PRIO_LABELS = { high: "Hoch", medium: "Mittel", low: "Niedrig" };
@@ -2173,6 +2591,7 @@ function initFirebase() {
   db.ref((ROOT_NODE + '/' + 'persons')).on("value", snap => {
     if (snap.val()) STATE.persons = snap.val();
     populatePersonSelects();
+    tryMatchPersonName();  // S3: persons-Update triggert Auth-Mapping-Re-Check
   });
   // Phases
   db.ref((ROOT_NODE + '/' + 'phases')).on("value", snap => {
@@ -2271,6 +2690,34 @@ function initFirebase() {
   db.ref((ROOT_NODE + '/' + 'listFolders')).on("value", snap => {
     STATE.listFolders = snap.val() || {};
     if (typeof renderCRM === 'function') renderCRM();
+  });
+
+  // ============ S3 v0.2.0 — neue Listener (Briefing S2 §1.4) ============
+  db.ref(ROOT_NODE + '/projects').on("value", snap => {
+    STATE.projects = snap.val() || {};
+    if (typeof renderResourcePlanning === 'function') renderResourcePlanning();
+    if (typeof renderAuftragsRentabilitaet === 'function') renderAuftragsRentabilitaet();
+  });
+  db.ref(ROOT_NODE + '/personCapacity').on("value", snap => {
+    STATE.personCapacity = snap.val() || {};
+    if (typeof renderResourcePlanning === 'function') renderResourcePlanning();
+    if (typeof renderWeekloadCockpit === 'function') renderWeekloadCockpit();
+  });
+  db.ref(ROOT_NODE + '/effortEstimates').on("value", snap => {
+    STATE.effortEstimates = snap.val() || {};
+    if (typeof renderResourcePlanning === 'function') renderResourcePlanning();
+    if (typeof renderWeekloadCockpit === 'function') renderWeekloadCockpit();
+    if (typeof renderAuftragsRentabilitaet === 'function') renderAuftragsRentabilitaet();
+  });
+  db.ref(ROOT_NODE + '/appConfig').on("value", snap => {
+    STATE.appConfig = snap.val() || { tagessoll: 8.4 };
+    if (typeof renderResourcePlanning === 'function') renderResourcePlanning();
+    if (typeof renderSettings === 'function') renderSettings();
+  });
+  db.ref(ROOT_NODE + '/personsData').on("value", snap => {
+    STATE.personsData = snap.val() || {};
+    tryMatchPersonName();
+    if (typeof renderSettings === 'function') renderSettings();
   });
 }
 
@@ -9293,151 +9740,11 @@ function markStateDirty(collection, id, data) {
 // ============ INIT ============
 document.getElementById("dateDisplay").textContent = "Stand: " + new Date().toLocaleDateString("de-CH", {day:"numeric",month:"long",year:"numeric"});
 document.getElementById("ttDate").value = new Date().toISOString().slice(0,10);
-seedDefaults();
-initFirebase();
-
-// v3.18: letzten aktiven Tab wiederherstellen (Erst-Besucher → Cockpit als Default bleibt)
-restoreLastTab();
-
-// Sub-Tab "Erfassen" als Default
-setTimeout(() => { if (typeof setTtSub === 'function') setTtSub('erfassen'); }, 100);
-
-// Migration: bestehende Kontakte auf neues Tag-Modell umstellen (one-shot beim Laden)
-db.ref((ROOT_NODE + '/' + 'contacts')).once("value", snap => {
-  const cs = snap.val() || {};
-  const updates = {};
-  Object.entries(cs).forEach(([id, c]) => {
-    let needsUpdate = false;
-    const upd = {...c};
-    // Tags-Migration: c.tags (string) → c.tagsSektoren (array), falls noch nicht migriert
-    if (c.tags && (!Array.isArray(c.tagsSektoren) || !c.tagsSektoren.length)) {
-      upd.tagsSektoren = c.tags.split(',').map(s=>s.trim()).filter(Boolean);
-      needsUpdate = true;
-    }
-    // Email-Migration: c.email (string) → c.emails (array), falls noch nicht migriert
-    if (c.email && (!Array.isArray(c.emails) || !c.emails.length)) {
-      upd.emails = [{ address: c.email, label: '', primary: true }];
-      needsUpdate = true;
-    }
-    // Falls vorhanden: ort entfernen (war veraltetes Feld)
-    if (c.ort !== undefined && c.ort !== null) {
-      upd.ort = null;
-      needsUpdate = true;
-    }
-    if (needsUpdate) updates[id] = upd;
-  });
-  if (Object.keys(updates).length) {
-    Object.entries(updates).forEach(([id, data]) => {
-      const safeUpd = {
-        tagsSektoren: data.tagsSektoren || [],
-        emails: data.emails || []
-      };
-      if (data.ort === null) safeUpd.ort = null;
-      db.ref((ROOT_NODE + '/' + 'contacts/') + id).update(safeUpd);
-    });
-    console.log('CRM-Migration v2: ' + Object.keys(updates).length + ' Kontakt(e) aktualisiert');
-  }
-});
-
-// v3.0 Migration: Org-Strings → Org-Records mit orgIds
-db.ref((ROOT_NODE + '/' + 'organizations')).once("value", orgSnap => {
-  const existingOrgs = orgSnap.val() || {};
-  // Index: Name (lowercase) → OrgId
-  const orgByName = {};
-  Object.entries(existingOrgs).forEach(([id, o]) => {
-    if (o.name) orgByName[o.name.toLowerCase().trim()] = id;
-  });
-
-  db.ref((ROOT_NODE + '/' + 'contacts')).once("value", cSnap => {
-    const cs = cSnap.val() || {};
-    let createdOrgs = 0;
-    let migratedContacts = 0;
-    const orgUpdates = {};
-    const contactUpdates = {};
-
-    Object.entries(cs).forEach(([cid, c]) => {
-      // Skip wenn bereits orgIds gesetzt
-      if (Array.isArray(c.orgIds) && c.orgIds.length) return;
-      // Skip wenn kein org-String
-      if (!c.org || !c.org.trim()) return;
-
-      const orgNames = c.org.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
-      const oids = [];
-      orgNames.forEach(orgName => {
-        const key = orgName.toLowerCase();
-        let oid = orgByName[key];
-        if (!oid) {
-          oid = 'org_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
-          orgByName[key] = oid;
-          orgUpdates[oid] = {
-            name: orgName,
-            desc: '',
-            sektor: '',
-            web: '',
-            location: '',
-            notes: '',
-            created: new Date().toISOString(),
-            _migrated: true
-          };
-          createdOrgs++;
-        }
-        oids.push(oid);
-      });
-      if (oids.length) {
-        contactUpdates[cid] = oids;
-        migratedContacts++;
-      }
-    });
-
-    // Schreibe Updates
-    if (createdOrgs > 0) {
-      db.ref((ROOT_NODE + '/' + 'organizations')).update(orgUpdates);
-    }
-    if (migratedContacts > 0) {
-      Object.entries(contactUpdates).forEach(([cid, oids]) => {
-        db.ref((ROOT_NODE + '/' + 'contacts/' + (cid) + '/orgIds')).set(oids);
-      });
-    }
-    if (createdOrgs || migratedContacts) {
-      console.log(`CRM v3 Migration: ${createdOrgs} Org(s) angelegt, ${migratedContacts} Kontakt(e) verknüpft`);
-    }
-  });
-});
-
-// v3.0 Default-Smart-Liste: Gepinnte
-db.ref((ROOT_NODE + '/' + 'lists')).once("value", snap => {
-  const existing = snap.val() || {};
-  const hasPinned = Object.values(existing).some(l => l.type === 'smart' && l.filter?.kind === 'pinned');
-  if (!hasPinned) {
-    db.ref((ROOT_NODE + '/' + 'lists/smart_pinned')).set({
-      name: '★ Gepinnt',
-      type: 'smart',
-      filter: { kind: 'pinned' },
-      desc: 'Alle gepinnten Personen (manuell markiert)',
-      created: new Date().toISOString()
-    });
-  }
-  const hasRecent = Object.values(existing).some(l => l.type === 'smart' && l.filter?.kind === 'recent');
-  if (!hasRecent) {
-    db.ref((ROOT_NODE + '/' + 'lists/smart_recent30')).set({
-      name: 'Touchpoint < 30 Tage',
-      type: 'smart',
-      filter: { kind: 'recent', maxDays: 30 },
-      desc: 'Personen mit Kontakt in den letzten 30 Tagen',
-      created: new Date().toISOString()
-    });
-  }
-  const hasStale = Object.values(existing).some(l => l.type === 'smart' && l.filter?.kind === 'stale');
-  if (!hasStale) {
-    db.ref((ROOT_NODE + '/' + 'lists/smart_stale90')).set({
-      name: 'Lange kein Kontakt',
-      type: 'smart',
-      filter: { kind: 'stale', minDays: 90 },
-      desc: 'Personen ohne Touchpoint in 90+ Tagen',
-      created: new Date().toISOString()
-    });
-  }
-});
+// S3 v0.2.0 — Auth-Gate: kein direkter seedDefaults/initFirebase/Migrations am top-level mehr.
+// Stattdessen registriert sich der Auth-Listener — sobald ein User da ist, läuft bootApp()
+// (siehe Definition oben), das alles in der richtigen Reihenfolge nachholt.
+// runMigrations() lebt jetzt drinnen in bootApp() (mit den one-shot CRM-Migrationen + Lists-Defaults).
+auth.onAuthStateChanged(handleAuthChange);
 </script>
 <!-- FLOATING KI CO-LEAD BUBBLE -->
 <div class="frag-bubble" id="fragBubble" onclick="toggleFragPopover()" title="KI Co-Lead">🤖</div>

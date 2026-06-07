@@ -1117,6 +1117,41 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   font-size: 12px; margin-bottom: 16px;
 }
 .settings-banner.danger { background: #FFE5E5; border-color: var(--app-danger); }
+
+/* Toast (S3 v0.2.0 — global UX feedback) */
+.toast-container {
+  position: fixed; bottom: 24px; right: 24px;
+  z-index: 11000; display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: #fff; border: 1px solid var(--app-border);
+  border-left: 3px solid var(--app-primary);
+  border-radius: 6px; padding: 10px 14px;
+  font-size: 13px; color: var(--app-text);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+  min-width: 200px; max-width: 360px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: auto;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-left-color: #2a9b4f; }
+.toast.error { border-left-color: var(--app-danger); }
+.toast.info { border-left-color: var(--app-primary); }
+
+/* sb-footer mini-action-button (Logout direkt im Account-Block) */
+.sb-footer { position: relative; }
+.sb-footer-action {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--app-text-muted);
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.sb-footer-action:hover { background: var(--app-bg); color: var(--app-danger); }
 </style>
 </head>
 <body>
@@ -1162,8 +1197,11 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
       <div class="sb-avatar-name" id="sbUserName">Nicht eingeloggt</div>
       <div class="sb-avatar-sub" id="sbUserSub">—</div>
     </div>
+    <span class="sb-footer-action" id="sbFooterLogout" title="Abmelden"
+          onclick="event.stopPropagation(); handleLogout()" style="display:none">↪</span>
   </div>
 </nav>
+<div class="toast-container" id="toastContainer"></div>
 
 <main class="app-main">
 
@@ -2016,7 +2054,7 @@ const ANTHROPIC_MODEL     = "claude-sonnet-4-20250514";
 // Erlaubt Bootstrap aus Empty-State: wenn diese E-Mail eingeloggt ist, aber noch keine
 // Person zugeordnet, lädt die App trotzdem und öffnet Settings-Tab zum Setup. Phase B: via
 // `personsData[name].admin = true` Flag in DB für Multi-Admin.
-const ADMIN_EMAIL = "osi@festivitas.space";
+const ADMIN_EMAIL = "hello@oswaldkoenig.ch";
 
 //
 //  >>>  K O N F I G U R A T I O N S - E N D E  <<<
@@ -2160,6 +2198,7 @@ function updateSidebarIdentity() {
   const av = document.getElementById("sbAvatar");
   const nm = document.getElementById("sbUserName");
   const sb = document.getElementById("sbUserSub");
+  const logoutBtn = document.getElementById("sbFooterLogout");
   if (!av) return;
   if (name) {
     av.textContent = getInitials(name);
@@ -2175,6 +2214,25 @@ function updateSidebarIdentity() {
     nm.textContent = "Nicht eingeloggt";
     sb.textContent = "—";
   }
+  if (logoutBtn) logoutBtn.style.display = email ? "" : "none";
+}
+
+// ============ TOAST (S3 v0.2.0 — global UX-Feedback für Save-Aktionen) ============
+// showToast(msg, type?) — type: 'success' | 'error' | 'info' (default).
+// Auto-dismiss nach 2.5 sek, mehrere Toasts stacken.
+function showToast(msg, type) {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+  const el = document.createElement("div");
+  el.className = "toast " + (type || "info");
+  el.textContent = msg;
+  container.appendChild(el);
+  // Force reflow for transition
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 220);
+  }, 2500);
 }
 
 // openIdentityModal + identityAddPersonAndSelect (S1 BUG-001-Quickfix) entfernt in S3 v0.2.0
@@ -2246,10 +2304,15 @@ function tryMatchPersonName() {
     if (typeof updateSidebarIdentity === 'function') updateSidebarIdentity();
     if (typeof renderSettings === 'function') renderSettings();
   }
-  // First-time-after-bootup ohne Match: einmal auf Settings switchen
+  // First-time-after-bootup ohne Match: einmal auf Settings switchen.
+  // DOM-direct statt switchToTab, damit der LocalStorage-Tab-State NICHT überschrieben wird
+  // (sonst startet die App nach Reload immer wieder auf Settings).
   if (!match && currentAuthUser && !autoSwitchedSettings && bootAppRan) {
     autoSwitchedSettings = true;
-    if (typeof switchToTab === 'function') switchToTab('settings');
+    document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    document.querySelector('.nav-tab[data-tab="settings"]')?.classList.add("active");
+    document.getElementById("tab-settings")?.classList.add("active");
   }
 }
 
@@ -2373,7 +2436,11 @@ function renderSettings() {
 // Settings: Tagessoll speichern (Bridge zu setDailyHours → Firebase).
 function handleTagessollSave() {
   const v = parseFloat(document.getElementById('settingsTagessoll')?.value);
-  setDailyHours(v).catch(err => alert(err.message || String(err)));
+  setDailyHours(v).then(() => {
+    showToast("Tagessoll gespeichert: " + v + " h/Tag", "success");
+  }).catch(err => {
+    showToast(err.message || String(err), "error");
+  });
 }
 
 // Settings: Person-Email speichern. Nur Felder mit Änderung schreiben.
@@ -2383,7 +2450,13 @@ function handlePersonEmailSave(input) {
   if (!person) return;
   const path = ROOT_NODE + '/personsData/' + person + '/email';
   const setter = email ? db.ref(path).set(email) : db.ref(path).remove();
-  setter.catch(err => alert("Speichern fehlgeschlagen: " + (err.message || err)));
+  setter.then(() => {
+    showToast(email
+      ? `E-Mail für „${person}" gespeichert.`
+      : `E-Mail für „${person}" entfernt.`, "success");
+  }).catch(err => {
+    showToast("Speichern fehlgeschlagen: " + (err.message || err), "error");
+  });
 }
 
 // Settings: Seed-Button — Phase-A-Stub, wird in S3.2 mit echtem seedEzData() befüllt.

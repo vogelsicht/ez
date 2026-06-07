@@ -1140,18 +1140,43 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 .toast.error { border-left-color: var(--app-danger); }
 .toast.info { border-left-color: var(--app-primary); }
 
-/* sb-footer mini-action-button (Logout direkt im Account-Block) */
+/* sb-footer Caret-Indikator + Account-Popover (S3.1.2 — Standard-Pattern wie andere Apps) */
 .sb-footer { position: relative; }
-.sb-footer-action {
+.sb-footer-caret {
   margin-left: auto;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--app-text-muted);
-  padding: 4px 6px;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 2px 4px;
   flex-shrink: 0;
 }
-.sb-footer-action:hover { background: var(--app-bg); color: var(--app-danger); }
+.account-popover {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 8px; right: 8px;
+  background: #fff;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  z-index: 1000;
+  display: none;
+  font-size: 12px;
+}
+.account-popover[data-open] { display: block; }
+.account-popover .ap-row { padding: 4px 8px; }
+.account-popover .ap-row.muted { color: var(--app-text-muted); font-size: 11px; }
+.account-popover .ap-row.email { font-weight: 500; word-break: break-all; }
+.account-popover .ap-divider { height: 1px; background: var(--app-border); margin: 6px 0; }
+.account-popover button {
+  display: block; width: 100%; text-align: left;
+  padding: 6px 8px; background: transparent; border: none;
+  cursor: pointer; font-size: 12px; color: var(--app-text);
+  border-radius: 4px;
+  font-family: inherit;
+}
+.account-popover button:hover { background: var(--app-bg-alt); }
+.account-popover button.danger { color: var(--app-danger); }
+.account-popover button.danger:hover { background: #FFE5E5; }
 </style>
 </head>
 <body>
@@ -1191,14 +1216,21 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   <button class="nav-tab" data-tab="frag" style="color:var(--app-tertiary)"><span class="sb-icon">🤖</span><span class="sb-label">KI Co-Lead</span></button>
   <button class="nav-tab" data-tab="settings"><span class="sb-icon">⚙</span><span class="sb-label">Einstellungen</span></button>
   <div class="sb-spacer"></div>
-  <div class="sb-footer" id="sbFooter" onclick="switchToTab('settings')" title="Einstellungen / Mein Account">
+  <div class="sb-footer" id="sbFooter" onclick="toggleAccountPopover(event)" title="Mein Account">
     <div class="sb-avatar" id="sbAvatar">?</div>
     <div class="sb-avatar-info">
       <div class="sb-avatar-name" id="sbUserName">Nicht eingeloggt</div>
       <div class="sb-avatar-sub" id="sbUserSub">—</div>
     </div>
-    <span class="sb-footer-action" id="sbFooterLogout" title="Abmelden"
-          onclick="event.stopPropagation(); handleLogout()" style="display:none">↪</span>
+    <span class="sb-footer-caret" id="sbFooterCaret" style="display:none">▾</span>
+    <div class="account-popover" id="accountPopover">
+      <div class="ap-row muted">Eingeloggt als</div>
+      <div class="ap-row email" id="accountPopoverEmail">—</div>
+      <div class="ap-row muted" id="accountPopoverPerson">—</div>
+      <div class="ap-divider"></div>
+      <button onclick="event.stopPropagation(); closeAccountPopover(); switchToTab('settings')">⚙ Einstellungen</button>
+      <button class="danger" onclick="event.stopPropagation(); closeAccountPopover(); handleLogout()">↩ Abmelden</button>
+    </div>
   </div>
 </nav>
 <div class="toast-container" id="toastContainer"></div>
@@ -2198,7 +2230,7 @@ function updateSidebarIdentity() {
   const av = document.getElementById("sbAvatar");
   const nm = document.getElementById("sbUserName");
   const sb = document.getElementById("sbUserSub");
-  const logoutBtn = document.getElementById("sbFooterLogout");
+  const caret = document.getElementById("sbFooterCaret");
   if (!av) return;
   if (name) {
     av.textContent = getInitials(name);
@@ -2214,7 +2246,41 @@ function updateSidebarIdentity() {
     nm.textContent = "Nicht eingeloggt";
     sb.textContent = "—";
   }
-  if (logoutBtn) logoutBtn.style.display = email ? "" : "none";
+  if (caret) caret.style.display = email ? "" : "none";
+  // Popover-Inhalt aktuell halten falls offen
+  if (document.getElementById("accountPopover")?.dataset.open) {
+    document.getElementById("accountPopoverEmail").textContent = email || "—";
+    document.getElementById("accountPopoverPerson").textContent = name ? "→ " + name : "Profil nicht verknüpft";
+  }
+}
+
+// ============ ACCOUNT-POPOVER (S3.1.2 — Standard-Dropdown statt Direkt-Logout) ============
+function openAccountPopover() {
+  const pop = document.getElementById("accountPopover");
+  if (!pop) return;
+  document.getElementById("accountPopoverEmail").textContent = currentAuthUser?.email || "—";
+  document.getElementById("accountPopoverPerson").textContent = currentPersonName
+    ? "→ " + currentPersonName
+    : "Profil nicht verknüpft";
+  pop.dataset.open = "1";
+  // Erst im nächsten Tick registrieren, damit der initial-trigger-Klick nicht direkt schliesst
+  setTimeout(() => document.addEventListener("click", accountPopoverOutsideClick), 0);
+}
+function closeAccountPopover() {
+  const pop = document.getElementById("accountPopover");
+  if (!pop) return;
+  delete pop.dataset.open;
+  document.removeEventListener("click", accountPopoverOutsideClick);
+}
+function toggleAccountPopover(event) {
+  if (event) event.stopPropagation();
+  if (!currentAuthUser) return;  // im Login-Screen nicht öffnen
+  const pop = document.getElementById("accountPopover");
+  if (pop?.dataset.open) closeAccountPopover();
+  else openAccountPopover();
+}
+function accountPopoverOutsideClick(e) {
+  if (!e.target.closest("#sbFooter")) closeAccountPopover();
 }
 
 // ============ TOAST (S3 v0.2.0 — global UX-Feedback für Save-Aktionen) ============

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="app-version" content="0.1b.2026-05-21">
+<meta name="app-version" content="0.2.0.2026-06-10">
 <title>Expedition Zukunft · Cockpit</title>
 
 <!-- Marken-Schrift (Darker Grotesque, via Google Fonts) -->
@@ -1177,6 +1177,157 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 .account-popover button:hover { background: var(--app-bg-alt); }
 .account-popover button.danger { color: var(--app-danger); }
 .account-popover button.danger:hover { background: #FFE5E5; }
+
+/* ============================================================ */
+/* === S3.2 v0.2.0 — Resource-Planning Pivot ================= */
+/* ============================================================ */
+.rp-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 4px 0 14px;
+  flex-wrap: wrap;
+}
+.rp-toggle {
+  display: inline-flex; border: 1px solid var(--app-border); border-radius: 6px;
+  overflow: hidden;
+}
+.rp-toggle button {
+  padding: 4px 12px; font-size: 12px;
+  background: #fff; border: none; cursor: pointer;
+  color: var(--app-text-muted);
+  font-family: inherit;
+}
+.rp-toggle button[data-active="true"] {
+  background: var(--app-primary); color: #fff;
+}
+.rp-toggle button:not([data-active="true"]):hover { background: var(--app-bg-alt); color: var(--app-text); }
+.rp-nav { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.rp-nav button { padding: 4px 8px; background: #fff; border: 1px solid var(--app-border); border-radius: 4px; cursor: pointer; font-family: inherit; }
+.rp-nav button:hover { background: var(--app-bg-alt); }
+.rp-period-label { font-weight: 500; min-width: 140px; text-align: center; }
+.rp-today { font-size: 11px; color: var(--app-text-muted); }
+
+.rp-empty-state {
+  background: #fff; border: 1px dashed var(--app-border);
+  border-radius: var(--app-radius);
+  padding: 24px; text-align: center; color: var(--app-text-muted); font-size: 13px;
+}
+
+.rp-table-wrapper {
+  background: #fff; border: 1px solid var(--app-border);
+  border-radius: var(--app-radius); overflow: auto;
+}
+.rp-table {
+  border-collapse: separate; border-spacing: 0;
+  width: 100%; font-size: 12px;
+}
+.rp-table th, .rp-table td {
+  padding: 4px 8px;
+  border-right: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-border);
+  white-space: nowrap;
+  text-align: right;
+  background: #fff;
+}
+.rp-table th:last-child, .rp-table td:last-child { border-right: none; }
+.rp-table thead th {
+  background: var(--app-bg-alt); font-weight: 500;
+  position: sticky; top: 0; z-index: 3;
+  font-size: 11px; color: var(--app-text-muted);
+}
+.rp-first-col {
+  position: sticky; left: 0; z-index: 2;
+  text-align: left !important;
+  min-width: 220px; max-width: 260px;
+  background: #fff;
+  white-space: normal !important;
+}
+.rp-table thead th.rp-first-col { z-index: 4; background: var(--app-bg-alt); }
+.rp-table tbody tr:hover td { background: #FAFBFC; }
+.rp-table tbody tr:hover .rp-first-col { background: #FAFBFC; }
+
+.rp-section-header th {
+  background: var(--app-bg) !important;
+  color: var(--app-text-muted);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 8px 8px 4px;
+  font-weight: 600;
+}
+.rp-cat-header { cursor: pointer; }
+.rp-cat-header td {
+  background: #F4F6F9 !important;
+  font-weight: 500;
+  text-align: left;
+  padding: 6px 8px;
+}
+.rp-cat-header:hover td { background: #ECEFF3 !important; }
+.rp-subcat-header td {
+  background: #F8FAFC !important;
+  font-weight: 500;
+  text-align: left;
+  font-size: 11px;
+  color: var(--app-text-muted);
+}
+
+.rp-row.rp-cap-total td, .rp-row.rp-cap-offen td { font-weight: 500; background: #FAFBFC; }
+.rp-row.rp-cap-offen .rp-cell-negative { color: var(--app-danger); }
+
+.rp-cell-input {
+  width: 100%;
+  border: none; background: transparent;
+  font-size: 12px; text-align: right;
+  padding: 2px 4px;
+  font-family: inherit;
+  color: var(--app-text);
+  -moz-appearance: textfield;
+}
+.rp-cell-input::-webkit-outer-spin-button,
+.rp-cell-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.rp-cell-input:focus {
+  outline: 1px solid var(--app-primary);
+  outline-offset: -1px;
+  background: #fff;
+}
+.rp-cell-input.rp-cell-readonly { color: var(--app-text-muted); pointer-events: none; }
+
+.rp-cell { position: relative; padding: 0 !important; }
+.rp-cell-note-dot {
+  position: absolute; top: 1px; right: 2px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--app-tertiary);
+  cursor: pointer;
+  opacity: 0.7;
+}
+.rp-cell:hover .rp-cell-note-add {
+  display: inline-block;
+  position: absolute; top: 0; right: 1px;
+  font-size: 9px; color: var(--app-text-muted);
+  cursor: pointer; padding: 2px;
+}
+.rp-cell-note-add { display: none; }
+.rp-cell-note-add:hover { color: var(--app-tertiary); }
+
+.rp-note-popover {
+  position: fixed;
+  background: #fff; border: 1px solid var(--app-border);
+  border-radius: 6px; padding: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  z-index: 1500;
+  min-width: 240px; max-width: 320px;
+}
+.rp-note-popover[hidden] { display: none; }
+.rp-note-popover textarea {
+  width: 100%; min-height: 70px;
+  padding: 6px 8px; font-size: 12px;
+  border: 1px solid var(--app-border); border-radius: 4px;
+  font-family: inherit; resize: vertical;
+}
+.rp-note-popover .rp-note-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.rp-note-popover .rp-note-meta { font-size: 10px; color: var(--app-text-muted); }
+.rp-note-popover .rp-note-btn { padding: 4px 10px; font-size: 11px; cursor: pointer; background: var(--app-primary); color: #fff; border: none; border-radius: 4px; }
+.rp-note-popover .rp-note-btn-del { background: transparent; color: var(--app-danger); }
 </style>
 </head>
 <body>
@@ -1200,6 +1351,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 
 <nav class="sidebar" id="navTabs">
   <button class="nav-tab active" data-tab="cockpit"><span class="sb-icon">◆</span><span class="sb-label">Cockpit</span></button>
+  <button class="nav-tab" data-tab="resourceplanning"><span class="sb-icon">📊</span><span class="sb-label">Aufwandsplanung</span></button>
   <button class="nav-tab" data-tab="tasks"><span class="sb-icon">☑</span><span class="sb-label">Aufgaben</span><span class="sb-badge" id="sbTaskBadge" style="display:none">0</span></button>
   <button class="nav-tab" data-tab="crm"><span class="sb-icon">👥</span><span class="sb-label">CRM</span></button>
   <div class="sb-group expanded" id="sbProjektGroup">
@@ -1255,6 +1407,17 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   <div class="metrics" id="cockpitMetrics"></div>
   <div class="section-label">Auf einen Blick</div>
   <div class="mod-grid" id="cockpitModules"></div>
+  <!-- S3.3 v0.2.0 — Ressourcen-Monitoring im Dashboard -->
+  <div class="logbook-grid" style="margin-top:16px">
+    <div class="logbook-col">
+      <div class="section-label">Auslastung diese Woche</div>
+      <div id="weekloadCockpit"></div>
+    </div>
+    <div class="logbook-col">
+      <div class="section-label">Aufträge — Rentabilität</div>
+      <div id="auftragRentab"></div>
+    </div>
+  </div>
   <div class="logbook-grid" style="margin-top:16px">
     <div class="logbook-col">
       <div class="section-label">Entscheidungslog</div>
@@ -1394,6 +1557,13 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   <div id="ttsub-entries" class="ttsub-pane" style="display:none">
     <div id="entriesSubtab"></div>
   </div>
+</div>
+
+<!-- RESOURCE-PLANNING TAB (S3.2 — Pivot Person × Kategorie × Woche/Monat) -->
+<div class="tab-content" id="tab-resourceplanning">
+  <div id="rpHeader"></div>
+  <div id="rpBody"></div>
+  <div id="rpNotePopover" class="rp-note-popover" hidden></div>
 </div>
 
 <!-- SETTINGS TAB (S3 v0.2.0) -->
@@ -1997,6 +2167,17 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 
 <!-- Identity-Modal entfernt in S3 v0.2.0 — durch Auth + Settings-Tab ersetzt. -->
 
+<!-- AUFTRAG-DETAIL MODAL (S3.3 — Aufschlüsselung pro Person) -->
+<div class="modal-overlay" id="auftragDetailModal">
+  <div class="modal" style="max-width:480px">
+    <h3 id="auftragDetailTitle">Auftrag</h3>
+    <div id="auftragDetailBody"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal('auftragDetailModal')">Schliessen</button>
+    </div>
+  </div>
+</div>
+
 <!-- INBOX-OVERLAY (Fullscreen Cards-Review) -->
 <div class="inbox-overlay" id="inboxOverlay">
   <div class="inbox-modal">
@@ -2061,7 +2242,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 //
 const APP_BRAND  = "Expedition Zukunft";   // Wird im Header und in JSON-Export verwendet
 const APP_SLUG   = "ez";                    // Filename-Prefix für CSV/JSON-Exporte
-const APP_VERSION = "0.1b.2026-05-21";       // Wird im Footer angezeigt
+const APP_VERSION = "0.2.0.2026-06-10";      // Wird im Footer angezeigt
 const ROOT_NODE  = "ezcockpit";             // Firebase root-Knoten (alle Daten leben hier drunter)
 const LEGACY_TIME_NODE = "ezarbeitsjournal";// Firebase root für Time-Tracking (separat, für künftige Migration)
 
@@ -2369,6 +2550,19 @@ function tryMatchPersonName() {
     currentPersonName = match;
     if (typeof updateSidebarIdentity === 'function') updateSidebarIdentity();
     if (typeof renderSettings === 'function') renderSettings();
+    // S3.3: personalisierter Start-Tab (data-driven via personsData[name].defaultTab, A11).
+    // Greift nur beim ersten Match und nur wenn der User keinen eigenen Tab-State hat.
+    // DOM-direct ohne LocalStorage-Write, sonst klebt der Default dauerhaft.
+    const defTab = match ? STATE.personsData?.[match]?.defaultTab : null;
+    let hasOwnTab = false;
+    try { hasOwnTab = !!localStorage.getItem('app_currentTab'); } catch(e) {}
+    if (defTab && !hasOwnTab && document.querySelector(`.nav-tab[data-tab="${defTab}"]`)) {
+      document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+      document.querySelector(`.nav-tab[data-tab="${defTab}"]`).classList.add("active");
+      document.getElementById("tab-" + defTab)?.classList.add("active");
+      if (defTab === 'resourceplanning' && typeof renderResourcePlanning === 'function') renderResourcePlanning();
+    }
   }
   // First-time-after-bootup ohne Match: einmal auf Settings switchen.
   // DOM-direct statt switchToTab, damit der LocalStorage-Tab-State NICHT überschrieben wird
@@ -2668,6 +2862,555 @@ function runMigrations() {
   });
 }
 
+// =================================================================
+// ============ S3.2/S3.3 — RESOURCE PLANNING (v0.2.0) =============
+// =================================================================
+// Datenmodell (Briefing S2 §1.1):
+//   projects/{id}                       {type, title, parentId, order, offerierteTage?}
+//   personCapacity/{name}/{YYYY-MM}     {arbeitstage, ferien, kompensation}   — in Tagen
+//   effortEstimates/{name}/{weekKey}/{projectId}   {hours, note?}
+// Kanonisch: Stunden + Wochen (A-NEW-1). WeekKey = Montag als YYYY-MM-DD (A-NEW-2).
+
+// ---------- Date-Helpers ----------
+function ezPad2(n) { return String(n).padStart(2, '0'); }
+function ezDateToKey(d) { return d.getFullYear() + '-' + ezPad2(d.getMonth()+1) + '-' + ezPad2(d.getDate()); }
+function ezKeyToDate(key) { const p = key.split('-').map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function ezWeekKeyOf(d) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));   // zurück auf Montag
+  return ezDateToKey(x);
+}
+function ezMonthKeyOf(d) { return d.getFullYear() + '-' + ezPad2(d.getMonth()+1); }
+function ezWeeksInMonth(ym) {
+  // Wochen-Keys deren MONTAG im Monat liegt (Briefing-Konvention)
+  const parts = ym.split('-').map(Number);
+  const d = new Date(parts[0], parts[1]-1, 1);
+  d.setDate(1 + ((8 - d.getDay()) % 7));   // erster Montag des Monats
+  const keys = [];
+  while (d.getMonth() === parts[1]-1) { keys.push(ezDateToKey(d)); d.setDate(d.getDate()+7); }
+  return keys;
+}
+function ezIsoWeekNum(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+function ezRound2(n) { return Math.round(n * 100) / 100; }
+
+// ---------- Data-Access (B1-Return-Types siehe Briefing §2.2) ----------
+function getEffortHours(person, weekKey, projectId) {
+  return Number(STATE.effortEstimates?.[person]?.[weekKey]?.[projectId]?.hours) || 0;
+}
+function getEffortNote(person, weekKey, projectId) {
+  return STATE.effortEstimates?.[person]?.[weekKey]?.[projectId]?.note || '';
+}
+function setEffortHours(person, weekKey, projectId, hours) {
+  const base = ROOT_NODE + '/effortEstimates/' + person + '/' + weekKey + '/' + projectId;
+  if (!hours || hours <= 0) {
+    // 0 löscht den Wert; Notiz bleibt erhalten falls vorhanden (B4: Notizen erhalten)
+    return getEffortNote(person, weekKey, projectId)
+      ? db.ref(base + '/hours').remove()
+      : db.ref(base).remove();
+  }
+  return db.ref(base + '/hours').set(ezRound2(hours));
+}
+function setEffortNote(person, weekKey, projectId, note) {
+  const base = ROOT_NODE + '/effortEstimates/' + person + '/' + weekKey + '/' + projectId;
+  note = (note || '').trim();
+  if (note) return db.ref(base + '/note').set(note);
+  return getEffortHours(person, weekKey, projectId)
+    ? db.ref(base + '/note').remove()
+    : db.ref(base).remove();
+}
+
+// ---------- Aggregation ----------
+function sumPersonProjectMonth(person, ym, projectId) {
+  return ezWeeksInMonth(ym).reduce((s, wk) => s + getEffortHours(person, wk, projectId), 0);
+}
+function sumPersonWeekAll(person, weekKey) {
+  const wk = STATE.effortEstimates?.[person]?.[weekKey] || {};
+  return Object.values(wk).reduce((s, v) => s + (Number(v?.hours) || 0), 0);
+}
+function sumPersonMonthAll(person, ym) {
+  return ezWeeksInMonth(ym).reduce((s, wk) => s + sumPersonWeekAll(person, wk), 0);
+}
+function sumProjectAllWeeks(projectId) {
+  // Über ALLE Personen und ALLE Wochen — für Rentabilität "Geplant Σ"
+  let sum = 0;
+  Object.values(STATE.effortEstimates || {}).forEach(weeks => {
+    Object.values(weeks || {}).forEach(projMap => {
+      const v = projMap ? projMap[projectId] : null;
+      if (v) sum += Number(v.hours) || 0;
+    });
+  });
+  return sum;
+}
+function personCapacityTotal(person, ym) {
+  const c = STATE.personCapacity?.[person]?.[ym];
+  if (!c || c.arbeitstage == null) return null;   // B2: keine Stammdaten → null
+  return (Number(c.arbeitstage)||0) - (Number(c.ferien)||0) - (Number(c.kompensation)||0);
+}
+function personCapacityOffen(person, ym) {
+  const total = personCapacityTotal(person, ym);
+  if (total == null) return null;
+  return total - sumPersonMonthAll(person, ym) / getDailyHours();
+}
+
+// ---------- View-State (LocalStorage — Anzeige-Präferenz, pro User OK) ----------
+const RP_LS_VIEW = 'ez_rpViewState';
+const RP_LS_COLLAPSED = 'ez_collapsedCategories';
+let rpState = (() => {
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem(RP_LS_VIEW)) || {}; } catch(e) {}
+  const today = new Date();
+  return {
+    view:    s.view === 'woche' ? 'woche' : 'monat',
+    unit:    s.unit === 'stunden' ? 'stunden' : 'tage',
+    month:   /^\d{4}-\d{2}$/.test(s.month) ? s.month : ezMonthKeyOf(today),
+    weekKey: /^\d{4}-\d{2}-\d{2}$/.test(s.weekKey) ? s.weekKey : ezWeekKeyOf(today)
+  };
+})();
+let rpRenderPending = false;
+function rpPersist() { try { localStorage.setItem(RP_LS_VIEW, JSON.stringify(rpState)); } catch(e) {} }
+function rpCollapsed() {
+  try { return new Set(JSON.parse(localStorage.getItem(RP_LS_COLLAPSED)) || []); } catch(e) { return new Set(); }
+}
+function rpToggleCat(id) {
+  const set = rpCollapsed();
+  if (set.has(id)) set.delete(id); else set.add(id);
+  try { localStorage.setItem(RP_LS_COLLAPSED, JSON.stringify(Array.from(set))); } catch(e) {}
+  renderResourcePlanning();
+}
+function rpCurrentMonth() {
+  return rpState.view === 'monat' ? rpState.month : ezMonthKeyOf(ezKeyToDate(rpState.weekKey));
+}
+function rpSetView(v) {
+  if (v === rpState.view) return;
+  if (v === 'woche') {
+    const todayWk = ezWeekKeyOf(new Date());
+    const weeks = ezWeeksInMonth(rpState.month);
+    rpState.weekKey = weeks.indexOf(todayWk) >= 0 ? todayWk : (weeks[0] || todayWk);
+  } else {
+    rpState.month = ezMonthKeyOf(ezKeyToDate(rpState.weekKey));
+  }
+  rpState.view = v; rpPersist(); renderResourcePlanning();
+}
+function rpSetUnit(u) {
+  if (u !== rpState.unit) { rpState.unit = u; rpPersist(); renderResourcePlanning(); }
+}
+function rpNav(dir) {
+  if (rpState.view === 'monat') {
+    const p = rpState.month.split('-').map(Number);
+    rpState.month = ezMonthKeyOf(new Date(p[0], p[1]-1+dir, 1));
+  } else {
+    const d = ezKeyToDate(rpState.weekKey);
+    d.setDate(d.getDate() + 7*dir);
+    rpState.weekKey = ezDateToKey(d);
+  }
+  rpPersist(); renderResourcePlanning();
+}
+function rpToday() {
+  const t = new Date();
+  rpState.month = ezMonthKeyOf(t); rpState.weekKey = ezWeekKeyOf(t);
+  rpPersist(); renderResourcePlanning();
+}
+function rpToDisplay(hours) { return rpState.unit === 'tage' ? hours / getDailyHours() : hours; }
+function rpFromDisplay(val) { return rpState.unit === 'tage' ? val * getDailyHours() : val; }
+
+// ---------- Projekt-Hierarchie ----------
+function rpProjectChildren(parentId) {
+  return Object.entries(STATE.projects || {})
+    .filter(([, p]) => (p.parentId || null) === parentId)
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+}
+
+// ---------- Pivot-Render ----------
+function renderResourcePlanning() {
+  const header = document.getElementById('rpHeader');
+  const body = document.getElementById('rpBody');
+  if (!header || !body) return;
+  // Edit-Schutz: nicht neu rendern während der User in einer Zelle tippt (Fokus-Verlust)
+  if (body.contains(document.activeElement) && document.activeElement.classList?.contains('rp-cell-input')) {
+    rpRenderPending = true; return;
+  }
+  rpRenderPending = false;
+
+  const isMonat = rpState.view === 'monat';
+  const ym = rpCurrentMonth();
+  let periodLabel;
+  if (isMonat) {
+    const p = rpState.month.split('-').map(Number);
+    periodLabel = MONTH_NAMES[p[1]-1] + ' ' + p[0];
+  } else {
+    const mon = ezKeyToDate(rpState.weekKey);
+    const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+6);
+    periodLabel = 'KW ' + ezIsoWeekNum(mon) + ' · ' + mon.getDate() + '.' + (mon.getMonth()+1) + '.–'
+                + sun.getDate() + '.' + (sun.getMonth()+1) + '.' + sun.getFullYear();
+  }
+  header.innerHTML = `
+    <div class="rp-header">
+      <div class="rp-toggle">
+        <button data-active="${isMonat}" onclick="rpSetView('monat')">Monat</button>
+        <button data-active="${!isMonat}" onclick="rpSetView('woche')">Woche</button>
+      </div>
+      <div class="rp-toggle">
+        <button data-active="${rpState.unit==='stunden'}" onclick="rpSetUnit('stunden')">Stunden</button>
+        <button data-active="${rpState.unit==='tage'}" onclick="rpSetUnit('tage')">Tage</button>
+      </div>
+      <div class="rp-nav">
+        <button onclick="rpNav(-1)">←</button>
+        <span class="rp-period-label">${periodLabel}</span>
+        <button onclick="rpNav(1)">→</button>
+        <button onclick="rpToday()">Heute</button>
+      </div>
+      <span class="rp-today">${rpState.unit==='tage' ? 'Tage à ' + getDailyHours() + 'h (Tagessoll)' : 'Stunden'}</span>
+    </div>`;
+
+  const persons = Array.isArray(STATE.persons) ? STATE.persons : [];
+  if (!persons.length || !Object.keys(STATE.projects || {}).length) {
+    body.innerHTML = `<div class="rp-empty-state">Noch keine Projekt-Hierarchie geladen.<br>
+      Einstellungen → „EZ-Seed-Daten laden" füllt Personen, Projekte und Kapazitäten.</div>`;
+    return;
+  }
+
+  const colSpan = persons.length + 2;
+  const headRow = `<tr><th class="rp-first-col">Kategorie</th>${persons.map(p => `<th>${esc(p)}</th>`).join('')}<th>Σ</th></tr>`;
+
+  // --- Kapazitäts-Block (immer in Tagen, pro Monat — auch in Wochen-View Monatsebene) ---
+  const CAP_FIELDS = [
+    { key: 'arbeitstage',  label: 'Arbeitstage' },
+    { key: 'ferien',       label: 'Ferien & Abwesenheit' },
+    { key: 'kompensation', label: 'Geplante Kompensation' }
+  ];
+  let rows = `<tr class="rp-section-header"><th class="rp-first-col" colspan="${colSpan}">Kapazität · ${esc(ym)} · in Tagen</th></tr>`;
+  CAP_FIELDS.forEach(f => {
+    rows += `<tr class="rp-row"><td class="rp-first-col" style="padding-left:20px">${f.label}</td>`;
+    persons.forEach(p => {
+      const v = STATE.personCapacity?.[p]?.[ym]?.[f.key];
+      rows += `<td class="rp-cell"><input type="number" inputmode="decimal" min="0" step="0.1" class="rp-cell-input"
+        value="${v != null ? v : ''}" placeholder="—"
+        data-person="${esc(p)}" data-field="${f.key}" data-ym="${ym}"
+        onchange="rpCapChange(this)" onblur="if(rpRenderPending)renderResourcePlanning()"></td>`;
+    });
+    rows += `<td></td></tr>`;
+  });
+  rows += `<tr class="rp-row rp-cap-total"><td class="rp-first-col" style="padding-left:20px">Kapazität Total</td>`;
+  persons.forEach(p => {
+    const t = personCapacityTotal(p, ym);
+    rows += `<td title="${t == null ? 'Kapazität noch nicht gesetzt' : 'Arbeitstage − Ferien − Kompensation'}">${t == null ? '—' : ezRound2(t)}</td>`;
+  });
+  rows += `<td></td></tr>`;
+  rows += `<tr class="rp-row rp-cap-offen"><td class="rp-first-col" style="padding-left:20px">Kapazität Offen</td>`;
+  persons.forEach(p => {
+    const o = personCapacityOffen(p, ym);
+    if (o == null) rows += `<td title="Kapazität noch nicht gesetzt">—</td>`;
+    else rows += `<td class="${o < 0 ? 'rp-cell-negative' : ''}" title="Total − geplante Aufwände des Monats">${ezRound2(o)}</td>`;
+  });
+  rows += `<td></td></tr>`;
+
+  // --- Projekt-Kategorien ---
+  const collapsed = rpCollapsed();
+  rpProjectChildren(null).forEach(([catId, cat]) => {
+    const isC = collapsed.has(catId);
+    rows += `<tr class="rp-cat-header" onclick="rpToggleCat('${catId}')">
+      <td class="rp-first-col" colspan="${colSpan}">${isC ? '▶' : '▼'} ${esc(cat.title)}</td></tr>`;
+    if (isC) return;
+    rpProjectChildren(catId).forEach(([childId, child]) => {
+      if (child.type === 'subcategory') {
+        const subC = collapsed.has(childId);
+        rows += `<tr class="rp-cat-header rp-subcat-header" onclick="rpToggleCat('${childId}')">
+          <td class="rp-first-col" colspan="${colSpan}" style="padding-left:24px">${subC ? '▶' : '▼'} ${esc(child.title)}</td></tr>`;
+        if (!subC) rpProjectChildren(childId).forEach(([leafId, leaf]) => {
+          rows += rpEffortRow(leafId, leaf, persons, ym, 40);
+        });
+      } else {
+        rows += rpEffortRow(childId, child, persons, ym, 24);
+      }
+    });
+  });
+
+  body.innerHTML = `<div class="rp-table-wrapper"><table class="rp-table"><thead>${headRow}</thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function rpEffortRow(projectId, proj, persons, ym, indent) {
+  const isMonat = rpState.view === 'monat';
+  let rowSum = 0;
+  const noteWeek = isMonat ? (ezWeeksInMonth(ym)[0] || null) : rpState.weekKey;
+  const cells = persons.map(p => {
+    const hours = isMonat ? sumPersonProjectMonth(p, ym, projectId) : getEffortHours(p, rpState.weekKey, projectId);
+    rowSum += hours;
+    const note = noteWeek ? getEffortNote(p, noteWeek, projectId) : '';
+    return `<td class="rp-cell">
+      <input type="number" inputmode="decimal" min="0" step="0.1" class="rp-cell-input"
+        value="${hours ? ezRound2(rpToDisplay(hours)) : ''}"
+        data-person="${esc(p)}" data-project="${projectId}"
+        onchange="rpEffortChange(this)" onblur="if(rpRenderPending)renderResourcePlanning()">
+      ${note
+        ? `<span class="rp-cell-note-dot" title="${esc(note)}" data-person="${esc(p)}" data-project="${projectId}" onclick="rpOpenNote(event, this)"></span>`
+        : `<span class="rp-cell-note-add" title="Notiz hinzufügen" data-person="${esc(p)}" data-project="${projectId}" onclick="rpOpenNote(event, this)">✎</span>`}
+    </td>`;
+  }).join('');
+  return `<tr class="rp-row">
+    <td class="rp-first-col" style="padding-left:${indent}px">${esc(proj.title)}</td>
+    ${cells}
+    <td>${rowSum ? ezRound2(rpToDisplay(rowSum)) : ''}</td>
+  </tr>`;
+}
+
+// ---------- Zell-Edits ----------
+function rpEffortChange(input) {
+  const person = input.dataset.person, projectId = input.dataset.project;
+  const val = parseFloat(input.value);
+  const hours = (isNaN(val) || val < 0) ? 0 : rpFromDisplay(val);
+  const projTitle = STATE.projects?.[projectId]?.title || projectId;
+  let op;
+  if (rpState.view === 'monat') {
+    // Monat-Eingabe → gleichmässig auf alle Wochen verteilen (B4: nie Monats-Schema, immer Wochen)
+    const weeks = ezWeeksInMonth(rpState.month);
+    if (!weeks.length) return;
+    const perWeek = hours / weeks.length;
+    op = Promise.all(weeks.map(wk => setEffortHours(person, wk, projectId, perWeek)));
+  } else {
+    op = setEffortHours(person, rpState.weekKey, projectId, hours);
+  }
+  op.then(() => {
+    const unitLabel = rpState.unit === 'tage' ? 'd' : 'h';
+    showToast(`${projTitle} · ${person}: ${isNaN(val) || val <= 0 ? 'gelöscht' : ezRound2(val) + ' ' + unitLabel + ' gespeichert'}`, 'success');
+  }).catch(err => showToast('Speichern fehlgeschlagen: ' + (err.message || err), 'error'));
+}
+
+function rpCapChange(input) {
+  const person = input.dataset.person, field = input.dataset.field, ym = input.dataset.ym;
+  const val = parseFloat(input.value);
+  const path = ROOT_NODE + '/personCapacity/' + person + '/' + ym + '/' + field;
+  const op = (isNaN(val) || input.value === '') ? db.ref(path).remove() : db.ref(path).set(val);
+  op.then(() => showToast(`Kapazität ${person} (${ym}) gespeichert.`, 'success'))
+    .catch(err => showToast('Speichern fehlgeschlagen: ' + (err.message || err), 'error'));
+}
+
+// ---------- Notiz-Popover ----------
+let rpNoteCtx = null;
+function rpOpenNote(event, el) {
+  event.stopPropagation();
+  const person = el.dataset.person, projectId = el.dataset.project;
+  const isMonat = rpState.view === 'monat';
+  const ym = rpCurrentMonth();
+  const weekKey = isMonat ? (ezWeeksInMonth(ym)[0] || null) : rpState.weekKey;
+  if (!weekKey) return;
+  rpNoteCtx = { person: person, projectId: projectId, weekKey: weekKey };
+  const pop = document.getElementById('rpNotePopover');
+  if (!pop) return;
+  const note = getEffortNote(person, weekKey, projectId);
+  pop.innerHTML = `
+    <textarea id="rpNoteText" placeholder="Notiz…">${esc(note)}</textarea>
+    <div class="rp-note-actions">
+      <span class="rp-note-meta">${esc(person)} · ${isMonat ? 'Notiz der 1. Monatswoche' : 'KW ' + ezIsoWeekNum(ezKeyToDate(weekKey))}</span>
+      <span>
+        ${note ? '<button class="rp-note-btn rp-note-btn-del" onclick="rpSaveNote(true)">Löschen</button>' : ''}
+        <button class="rp-note-btn" onclick="rpSaveNote(false)">Speichern</button>
+      </span>
+    </div>`;
+  const r = el.getBoundingClientRect();
+  pop.hidden = false;
+  const pw = Math.min(320, window.innerWidth - 24);
+  pop.style.left = Math.max(12, Math.min(r.left, window.innerWidth - pw - 12)) + 'px';
+  pop.style.top = Math.min(r.bottom + 6, window.innerHeight - 160) + 'px';
+  setTimeout(() => document.addEventListener('click', rpNoteOutside), 0);
+  document.getElementById('rpNoteText')?.focus();
+}
+function rpNoteOutside(e) { if (!e.target.closest('#rpNotePopover')) rpCloseNote(); }
+function rpCloseNote() {
+  const pop = document.getElementById('rpNotePopover');
+  if (pop) pop.hidden = true;
+  document.removeEventListener('click', rpNoteOutside);
+  rpNoteCtx = null;
+}
+function rpSaveNote(del) {
+  if (!rpNoteCtx) return;
+  const text = del ? '' : (document.getElementById('rpNoteText')?.value || '');
+  setEffortNote(rpNoteCtx.person, rpNoteCtx.weekKey, rpNoteCtx.projectId, text)
+    .then(() => showToast(del ? 'Notiz gelöscht.' : 'Notiz gespeichert.', 'success'))
+    .catch(err => showToast('Notiz speichern fehlgeschlagen: ' + (err.message || err), 'error'));
+  rpCloseNote();
+}
+
+// ---------- S3.3: Cockpit-Sektion "Auslastung diese Woche" ----------
+function renderWeekloadCockpit() {
+  const el = document.getElementById('weekloadCockpit');
+  if (!el) return;
+  const persons = Array.isArray(STATE.persons) ? STATE.persons : [];
+  if (!persons.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--app-text-muted)">Noch keine Personen angelegt.</div>';
+    return;
+  }
+  const now = new Date();
+  const wkThis = ezWeekKeyOf(now);
+  const wkNext = ezWeekKeyOf(new Date(now.getFullYear(), now.getMonth(), now.getDate()+7));
+  const ym = ezMonthKeyOf(now);
+  const nWeeks = ezWeeksInMonth(ym).length || 4;
+  const dh = getDailyHours();
+  const rows = persons.map(p => {
+    const dThis = sumPersonWeekAll(p, wkThis) / dh;
+    const dNext = sumPersonWeekAll(p, wkNext) / dh;
+    const capT = personCapacityTotal(p, ym);
+    const capWeek = capT != null ? capT / nWeeks : null;   // Vereinfachung Phase A
+    let badge = '<span title="Kapazität nicht gesetzt">—</span>';
+    if (capWeek != null && capWeek > 0) {
+      const pct = dThis / capWeek;
+      badge = pct < 0.9 ? '✓' : (pct <= 1.1 ? '⚠' : '🔴');
+    }
+    return `<tr style="cursor:pointer" title="Zur Aufwandsplanung" onclick="rpFocusFromCockpit()">
+      <td style="text-align:left">${esc(p)}</td>
+      <td>${ezRound2(dThis)} d</td><td>${ezRound2(dNext)} d</td>
+      <td style="text-align:center">${badge}</td></tr>`;
+  }).join('');
+  el.innerHTML = `<div class="rp-table-wrapper"><table class="rp-table" style="font-size:11px"><thead><tr>
+    <th style="text-align:left">Person</th><th>Soll diese Wo.</th><th>Soll nächste Wo.</th><th>Status</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function rpFocusFromCockpit() {
+  rpState.view = 'woche'; rpState.weekKey = ezWeekKeyOf(new Date()); rpPersist();
+  switchToTab('resourceplanning');
+  renderResourcePlanning();
+}
+
+// ---------- S3.3: Cockpit-Sektion "Aufträge — Rentabilität" ----------
+function renderAuftragsRentabilitaet() {
+  const el = document.getElementById('auftragRentab');
+  if (!el) return;
+  const auftraege = Object.entries(STATE.projects || {})
+    .filter(([, p]) => p.type === 'auftrag')
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+  if (!auftraege.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--app-text-muted)">Noch keine Aufträge angelegt (Einstellungen → Seed laden).</div>';
+    return;
+  }
+  const dh = getDailyHours();
+  const rows = auftraege.map(([id, p]) => {
+    const off = Number(p.offerierteTage) || 0;
+    const geplant = sumProjectAllWeeks(id) / dh;
+    const geleistet = Object.values(STATE.timeEntries || {})
+      .filter(e => e && e.projectId === id)
+      .reduce((s, e) => s + (Number(e.hours) || 0), 0) / dh;
+    const pct = off > 0 ? (geplant + geleistet) / off : 0;
+    const badge = pct <= 0.8 ? '🟢' : (pct <= 1.0 ? '🟡' : '🔴');
+    return `<tr>
+      <td style="text-align:left;cursor:pointer" data-id="${id}" onclick="openAuftragDetail(this)" title="Aufschlüsselung pro Person">${esc(p.title)}</td>
+      <td class="rp-cell"><input type="number" class="rp-cell-input" min="0" step="0.5" value="${off || ''}" placeholder="—"
+        data-id="${id}" onchange="handleOfferierteTageSave(this)" title="Offerierte Tage — direkt editierbar"></td>
+      <td>${ezRound2(geplant)} d</td>
+      <td>${ezRound2(geleistet)} d</td>
+      <td style="white-space:nowrap">${badge} ${Math.round(pct * 100)}%</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<div class="rp-table-wrapper"><table class="rp-table" style="font-size:11px"><thead><tr>
+    <th style="text-align:left">Auftrag</th><th>Offeriert (d)</th><th>Geplant Σ</th><th>Geleistet Σ</th><th>Status</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function handleOfferierteTageSave(input) {
+  const id = input.dataset.id;
+  const v = parseFloat(input.value);
+  const val = (isNaN(v) || v < 0) ? 0 : v;
+  db.ref(ROOT_NODE + '/projects/' + id + '/offerierteTage').set(val)
+    .then(() => showToast('Offerierte Tage gespeichert: ' + val + ' d', 'success'))
+    .catch(err => showToast('Speichern fehlgeschlagen: ' + (err.message || err), 'error'));
+}
+function openAuftragDetail(el) {
+  const id = el.dataset.id;
+  const p = STATE.projects?.[id];
+  if (!p) return;
+  const dh = getDailyHours();
+  const rows = (STATE.persons || []).map(name => {
+    let geplantH = 0;
+    Object.values(STATE.effortEstimates?.[name] || {}).forEach(projMap => {
+      if (projMap && projMap[id]) geplantH += Number(projMap[id].hours) || 0;
+    });
+    const geplant = geplantH / dh;
+    const geleistet = Object.values(STATE.timeEntries || {})
+      .filter(e => e && e.projectId === id && (e.persons || []).indexOf(name) >= 0)
+      .reduce((s, e) => s + (Number(e.hours) || 0), 0) / dh;
+    if (!geplant && !geleistet) return '';
+    return `<tr><td style="text-align:left">${esc(name)}</td><td>${ezRound2(geplant)} d</td><td>${ezRound2(geleistet)} d</td></tr>`;
+  }).filter(Boolean).join('');
+  document.getElementById('auftragDetailTitle').textContent = p.title + ' — pro Person';
+  document.getElementById('auftragDetailBody').innerHTML = rows
+    ? `<div class="rp-table-wrapper"><table class="rp-table"><thead><tr><th style="text-align:left">Person</th><th>Geplant</th><th>Geleistet</th></tr></thead><tbody>${rows}</tbody></table></div>`
+    : '<div style="font-size:12px;color:var(--app-text-muted)">Noch keine geplanten oder geleisteten Tage für diesen Auftrag.</div>';
+  openModal('auftragDetailModal');
+}
+
+// ---------- EZ-Seed (Briefing §2.2 — idempotent via appConfig.seeded) ----------
+function seedEzData() {
+  if (STATE.appConfig?.seeded) {
+    showToast('EZ-Seed bereits geladen — keine Änderungen.', 'info');
+    return Promise.resolve();
+  }
+  const EZ_PERSONS = ["Pascal", "Salimata", "Sandro", "Josephine", "Anton", "Joël", "Mariam", "Saya"];
+  const persons = Array.from(new Set((STATE.persons || []).concat(EZ_PERSONS)));
+  const PROJECTS = {
+    p_internal:   { type: "category", title: "Internal", parentId: null, order: 1 },
+    p_int_admin:  { type: "leaf", title: "Admin", parentId: "p_internal", order: 1 },
+    p_int_team:   { type: "leaf", title: "Teammeeting, Weekly, Roundup", parentId: "p_internal", order: 2 },
+    p_int_anfrag: { type: "leaf", title: "Kurzfristige Anfragen", parentId: "p_internal", order: 3 },
+    p_orga:       { type: "category", title: "Orga-Entwicklung", parentId: null, order: 2 },
+    p_orga_fund:  { type: "leaf", title: "Funding (Fundraising + Aufträge)", parentId: "p_orga", order: 1 },
+    p_orga_event: { type: "leaf", title: "Externe Events / Weiterbildung", parentId: "p_orga", order: 2 },
+    p_orga_komm:  { type: "leaf", title: "Kommunikation", parentId: "p_orga", order: 3 },
+    p_orga_hr:    { type: "leaf", title: "HR, Teambuilding, Büro", parentId: "p_orga", order: 4 },
+    p_orga_strat: { type: "leaf", title: "Strategie / Retraiten, VS etc.", parentId: "p_orga", order: 5 },
+    p_orga_fin:   { type: "leaf", title: "Finanzen/Buchhaltung", parentId: "p_orga", order: 6 },
+    p_orga_konz:  { type: "leaf", title: "Konzeption Formate", parentId: "p_orga", order: 7 },
+    p_orga_intl:  { type: "leaf", title: "Internationalisierung", parentId: "p_orga", order: 8 },
+    p_orga_inst:  { type: "leaf", title: "Institutionalisierung", parentId: "p_orga", order: 9 },
+    p_projekte:   { type: "category", title: "Projekte", parentId: null, order: 3 },
+    p_spaces:     { type: "subcategory", title: "Spaces", parentId: "p_projekte", order: 1 },
+    p_sp_klima:   { type: "space", title: "Klima Scoping", parentId: "p_spaces", order: 1 },
+    p_sp_demok:   { type: "space", title: "Demokratie Scoping & SGG", parentId: "p_spaces", order: 2 },
+    p_auftrage:   { type: "subcategory", title: "Aufträge", parentId: "p_projekte", order: 2 },
+    p_au_mint:    { type: "auftrag", title: "Sprint MINT", parentId: "p_auftrage", offerierteTage: 0, order: 1 },
+    p_au_policy:  { type: "auftrag", title: "Policy Brief", parentId: "p_auftrage", offerierteTage: 0, order: 2 },
+    p_au_fhch:    { type: "auftrag", title: "FH CH", parentId: "p_auftrage", offerierteTage: 0, order: 3 },
+    p_au_innob:   { type: "auftrag", title: "Innobooster New Mobility", parentId: "p_auftrage", offerierteTage: 0, order: 4 },
+    p_au_ttt:     { type: "auftrag", title: "Train-the-Trainer Studienstiftung", parentId: "p_auftrage", offerierteTage: 0, order: 5 },
+    p_au_love:    { type: "auftrag", title: "Love Politics", parentId: "p_auftrage", offerierteTage: 0, order: 6 },
+    p_au_vis:     { type: "auftrag", title: "VIS Mission Salesx", parentId: "p_auftrage", offerierteTage: 0, order: 7 }
+  };
+  const CAP_MAY = {
+    "Pascal":    { arbeitstage: 14.4, ferien: 0,   kompensation: 0 },
+    "Salimata":  { arbeitstage: 14.4, ferien: 1,   kompensation: 2 },
+    "Sandro":    { arbeitstage: 14.4, ferien: 0,   kompensation: 0 },
+    "Josephine": { arbeitstage: 14.4, ferien: 0,   kompensation: 1 },
+    "Anton":     { arbeitstage: 14.4, ferien: 3.3, kompensation: 1 },
+    "Joël":      { arbeitstage: 14.4, ferien: 4,   kompensation: 0 },
+    "Mariam":    { arbeitstage: 14.4, ferien: 0,   kompensation: 0 },
+    "Saya":      { arbeitstage: 14.4, ferien: 1,   kompensation: 1 }
+  };
+  const updates = { persons: persons };
+  Object.keys(PROJECTS).forEach(id => { updates['projects/' + id] = PROJECTS[id]; });
+  EZ_PERSONS.forEach(n => {
+    updates['personCapacity/' + n + '/2026-05'] = CAP_MAY[n];
+    // Juni zusätzlich zur Briefing-Vorgabe (Mai): Demo läuft im Juni, sonst wäre die
+    // Default-Ansicht (aktueller Monat) leer. Neutrale Baseline, Salimata passt an.
+    updates['personCapacity/' + n + '/2026-06'] = { arbeitstage: CAP_MAY[n].arbeitstage, ferien: 0, kompensation: 0 };
+  });
+  // Personalisierter Start-Tab data-driven (A11: Konfiguration statt if-person-Verzweigung)
+  updates['personsData/Salimata/defaultTab'] = 'resourceplanning';
+  updates['appConfig/seeded'] = true;
+  const btn = document.getElementById('seedEzBtn');
+  if (btn) btn.disabled = true;
+  return Promise.all([
+    db.ref(ROOT_NODE).update(updates),
+    // Legacy-Time-Node ist faktisch Source-of-Truth für persons (Listener synct legacy→root)
+    db.ref(LEGACY_TIME_NODE + '/persons').set(persons)
+  ]).then(() => {
+    showToast('EZ-Seed geladen: ' + persons.length + ' Personen, ' + Object.keys(PROJECTS).length + ' Projekte, Kapazität Mai+Juni 2026.', 'success');
+  }).catch(err => {
+    showToast('Seed fehlgeschlagen: ' + (err.message || err), 'error');
+  }).finally(() => { if (btn) btn.disabled = false; });
+}
+
 const PRIO_LABELS = { high: "Hoch", medium: "Mittel", low: "Niedrig" };
 const PRIO_PILLS = { high: "pill-pink", medium: "pill-muted", low: "pill-muted" };
 const STATUS_LABELS = {
@@ -2794,6 +3537,7 @@ function initFirebase() {
     STATE.timeEntries = snap.val() || {};
     renderTimetrack();
     renderCockpit();
+    if (typeof renderAuftragsRentabilitaet === 'function') renderAuftragsRentabilitaet();  // S3.3: Geleistet-Spalte
   });
   db.ref((LEGACY_TIME_NODE + '/' + 'categories')).on("value", snap => {
     STATE.timeCategories = snap.val() || {};
@@ -9929,7 +10673,7 @@ auth.onAuthStateChanged(handleAuthChange);
 </div>
 
 <div style="text-align:center;padding:12px 20px;font-size:10px;color:var(--app-text-muted);border-top:1px solid var(--app-border);margin-top:20px">
-  Expedition Zukunft · Cockpit · v0.1b.2026-05-21
+  Expedition Zukunft · Cockpit · v0.2.0.2026-06-10
 </div>
 </body>
 </html>

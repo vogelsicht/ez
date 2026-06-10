@@ -96,6 +96,17 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 
 ## Designentscheide
 
+### S3 Designentscheide
+
+1. **Wochen-View = eine Woche pro Ansicht** (Pfeile steppen wochenweise). Briefing-Beispiel „← KW 19-22 →" war als Range lesbar; Spalten sind aber Personen, also wäre Person×Woche-Matrix 40+ Spalten geworden. Eine-Woche-Ansicht erfüllt den Briefing-Smoke („Mai zeigt KW…, Wert verteilt") und bleibt lesbar.
+2. **Kapazitäts-Block immer in Tagen**, unabhängig vom Stunden/Tage-Toggle — die Stammdaten kommen aus Salimatas Sheet in Tagen, eine Umrechnung würde beim Pflegen verwirren.
+3. **Default-Tab data-driven** via `personsData[name].defaultTab` statt `if (person === "Salimata")` — A11 Configuration-First. Seed setzt den Wert für Salimata.
+4. **Juni-Kapazität zusätzlich geseedet** (Briefing: nur Mai). Demo läuft im Juni; ohne Juni-Baseline wäre die Default-Ansicht (aktueller Monat) leer. Neutrale Werte (14.4/0/0), Salimata passt an.
+5. **persons auch in `LEGACY_TIME_NODE` geschrieben beim Seed** — der bestehende Legacy-Listener synct legacy→root und hätte sonst den Seed wieder überschrieben. Legacy-Node ist faktisch Source-of-Truth für persons (Drift-Hinweis unten).
+6. **Toast pro Zell-Edit** statt stillem Save — Osi-UX-Regel aus S3.1-Smoke: „Feedback muss da sein". Auto-Dismiss 2.5s hält es erträglich.
+7. **Kein Re-Render bei fokussierter Zelle** (`rpRenderPending`-Guard) — Firebase-Listener-Roundtrip hätte sonst beim Durch-Tabben den Fokus zerstört.
+8. **Offerierte Tage inline editierbar** in der Rentabilitäts-Tabelle statt „via Firebase-Console" (Briefing-TBD) — DP11 Test-Self-Equals-User, keine Console-Workarounds.
+
 ### S1 Designentscheide
 
 1. **Identity-Modal Empty-State: Inline-Add statt Settings-Tab** (Phase-A-Quickfix für BUG-001). Entschieden: `+ Person anlegen`-Eingabe direkt im Identity-Modal-Body, neuer Helper `identityAddPersonAndSelect(name)` der `addPerson()` + `setCurrentUser()` + `closeModal()` kombiniert. Alternative wäre voller Settings-Tab gewesen — abgelehnt weil das Architektur-Eskalation gebraucht hätte (mehrere Settings-Bereiche, Tab-Position, A11-Config-vs-Daten-Schnitt). Quickfix ist reversibel und blockiert keine spätere Settings-Architektur in Phase B.
@@ -103,6 +114,18 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 ---
 
 ## Mitnahmen für nächste Session
+
+### Offen am Ende S3 (aktuell)
+
+- **Salimata-Preview-Call ist der nächste Schritt** (BL-006): URL + Login (`salimata@expeditionzukunft.ch` / Initial-PW) teilen. Ihr Login ist im Personen-Mapping noch NICHT verknüpft — Osi muss in Settings → Personen-Mapping ihre E-Mail bei „Salimata" eintragen, sonst landet sie im „nicht zugeordnet"-Banner.
+- **Etappe 2 (Clockify)** wartet auf Preview-Feedback. Braucht von Osi: Clockify-API-Key als Worker-Secret, Firebase-Admin-Token für Cron (Briefing §3.1).
+- **Nur 2 von 9 Auth-Usern angelegt** (hello@oswaldkoenig.ch, salimata@). Restliche 6 EZ-User vor Team-Rollout anlegen (PW-Schema `ez-demo`).
+- **Demo-Beispieldaten in der DB:** Salimata×Admin 1.0d/Juni + Notiz, Pascal×Sprint-MINT 0.5d/Wo, Salimata×VIS 0.25d/Wo, Sprint MINT offeriert=10d. Bewusst dringelassen als Demo-Material.
+
+### Drift-Hinweise (S3)
+
+- **`LEGACY_TIME_NODE/persons` ist faktisch Source-of-Truth für die Personen-Liste:** der Listener synct legacy→root und überschreibt root bei jedem Legacy-Event. Zusätzlich: bei leerem Legacy-Node würde `set(null)` die Root-Liste löschen (Latent-Bug, aktuell harmlos weil Legacy gefüllt). Konsolidierung = Phase-B-Thema.
+- **Versions-String `0.2.0.2026-06-10` weicht vom S0-5-Schema** (`{major}.{minor}{patch_letter}.{datum}`) ab — Briefing §1.4 hat explizit `v0.2.0.YYYY-MM-DD` vorgegeben. Etappe 2 wird `0.2a.YYYY-MM-DD`, dann ist das Schema wieder konsistent.
 
 ### Offen am Ende S1
 
@@ -130,6 +153,7 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 |---|---|---|---|
 | **S0** | **2026-05-20** | 0.1.0 (Übergabe-Stand) | **Bootstrap (kein Code-Patch) · app-coding_kontext initialisiert · Erster Code-Lauf wartet auf S1 (Repo-Init + Firebase + Worker + Config-Replace + Seed-Data)** |
 | **S1** | **2026-05-21** | 0.1.0 → 0.1a → 0.1b.2026-05-21 | **Setup-Patch (firebaseConfig + ANTHROPIC_PROXY_URL + Versions-Bump) → live deployed. BUG-001 Quickfix (Identity-Modal Empty-State Onboarding via Inline-Add). 4 Strategie-Themen für Phase-B-Discovery eskaliert.** |
+| **S3** | **2026-06-06–10** | 0.1b → 0.2.0.2026-06-10 | **Briefing S2 Etappe 1 komplett (4 Pushes): S3.1 Auth-Layer + Login + Settings-Tab; S3.1.1 Toasts + Admin-Mail-Fix + Tab-Bounce-Fix; S3.1.2 Account-Popover; S3.2+S3.3 Pivot-Tabelle + EZ-Seed + Cockpit-Monitoring. DB-Rules `auth != null`. Live-Smoke via Preview gegen Prod-Firebase (eingeloggt). Bereit für Salimata-Preview.** |
 
 ---
 

@@ -31,8 +31,8 @@ Plus **Inbox-Workflow** für Transkript-Import (Meeting → LLM → strukturiert
 
 | File | Version | Zuletzt geändert | Status |
 |---|---|---|---|
-| `ez-cockpit.html` | `0.1b.2026-05-21` | 2026-05-21 (S1) | live deployed via GitHub Pages, Firebase + Worker verbunden, Identity-Onboarding Quickfix |
-| (Cloudflare Worker) | live | 2026-05-21 (vor S1) | `vogelsicht-ez.holy-forest-0174.workers.dev`, Anthropic-Secret gesetzt |
+| `ez-cockpit.html` | `0.2.0.2026-06-10` | 2026-06-10 (S3) | live: Auth (E-Mail/Passwort), Settings-Tab, Aufwandsplanung-Pivot, EZ-Seed geladen, Cockpit-Monitoring. DB-Rules auf `auth != null` |
+| (Cloudflare Worker) | live | 2026-05-21 (vor S1) | `vogelsicht-ez.holy-forest-0174.workers.dev`, Anthropic-Secret gesetzt. Clockify-Endpoint folgt in Etappe 2 |
 
 ---
 
@@ -136,7 +136,7 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 - [x] **BL-002** Cloudflare Worker als Anthropic-Proxy deployen + API-Key als Secret setzen ✅ vor S1
 - [x] **BL-003** GitHub-Repo anlegen + GitHub Pages aktivieren ✅ vor S1 (`vogelsicht/ez`)
 - [x] **BL-004** `firebaseConfig` + `ANTHROPIC_PROXY_URL` in `ez-cockpit.html` ersetzen ✅ S1
-- [ ] **BL-005** Pitch-Features v0.2.0 + EZ-Seed gemäss `docs/briefing_S2_pitch_features.md` Etappe 1: Auth (E-Mail/Passwort), Settings-Tab, Resource-Planning-Pivot (Person × Kategorie × Woche), 8 EZ-Personen, Projekt-Hierarchie aus Salimata Screenshot, Auftrags-Rentabilitäts-Sicht (manuell). Eigenständig vorzeigbar nach Abschluss.
+- [x] **BL-005** Pitch-Features v0.2.0 + EZ-Seed gemäss `docs/briefing_S2_pitch_features.md` Etappe 1 ✅ S3 (2026-06-10): Auth live, Settings-Tab, Pivot (Person × Kategorie × Woche/Monat, Stunden/Tage), EZ-Seed (9 Personen, 26 Projekte, Kapazität Mai+Juni), Auslastungs- + Rentabilitäts-Monitoring im Cockpit. Eigenständig vorzeigbar — **bereit für Salimata-Preview (BL-006)**.
 - [ ] **BL-005b** Pitch-Features v0.2a gemäss `docs/briefing_S2_pitch_features.md` Etappe 2: Clockify-API-Integration via Worker, Cron-Auto-Sync alle 2h, Manual-Sync-Button, TimeEntry-projectId-Verdrahtung, Auftrags-Rentabilität-Auto. Voraussetzung: BL-005 abgeschlossen.
 - [ ] **BL-006** Pre-Pitch-Preview mit Kunden-Tech-Lead (15min Call, Feedback einarbeiten)
 - [ ] **BL-007** Backup-Plan: lokales Demo-Video falls Worker während Pitch streikt
@@ -150,7 +150,7 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
   - Bonus ✅ Firebase Read-Probe (`db.ref(ROOT_NODE).once('value')`): topLevel-Keys `lists, persons, phases, tagLibrary`
 
 #### Phase B · Discovery (wartet auf Auftrag)
-- [ ] **BL-010** Firebase Auth-Layer entscheiden (Email/Password vs. Google-SSO vs. Magic-Link)
+- [x] **BL-010** ~~Firebase Auth-Layer entscheiden~~ obsolet: S2-Beschluss S2-2 hat E-Mail/Passwort vorgegriffen, in S3 implementiert. Phase-B-Rest: granulare Rules (→ DS3)
 - [ ] **BL-011** EZ-spezifische Tag-Library (sektoren / kompetenzen / themen) mit Kunden-Tech-Lead durchgehen
 - [ ] **BL-012** Bereiche/Areas für Tasks anpassen (Default `kommunikation/partner/finanzen/strategie/programm/tools` → EZ-Vokabular)
 - [ ] **BL-013** Frag-Co-Lead-System-Prompt auf EZ-Sprache verfeinern (Policy Sprint, Stakeholder-Konstellation, etc.)
@@ -159,7 +159,7 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 
 #### Phase C · Build & Pilot (wartet auf Discovery)
 - [ ] **BL-020** Production-Firebase-Projekt (vs. Demo) — getrennte DB, Auth aktiviert
-- [ ] **BL-021** Settings-Panel für Team-Verwaltung direkt im UI (statt Identity-Modal)
+- [x] **BL-021** ~~Settings-Panel für Team-Verwaltung direkt im UI~~ vorgegriffen in S3: Settings-Tab mit Tagessoll, Personen-E-Mail-Mapping, Account, Seed. Phase-C-Rest: Personen anlegen/entfernen im UI
 - [ ] **BL-022** Multi-Workspace-Fähigkeit (mehrere parallele Policy Sprints?) — abhängig von Discovery-Resultat
 
 #### Phase D · Production + Multi-Customer (Future)
@@ -306,6 +306,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 | **S0** | 2026-05-20 | Strategie (Bootstrap) | Übergabe-Doc analysiert, FB-Setup-Patterns übernommen, 7 Doku-Files generiert, Phase-Plan ratifiziert | EZ-Cockpit-Projekt initialisiert; Phase A startbereit; nächstes: S1 Demo-Sprint-Kickoff |
 | **S1** | 2026-05-21 | App-Coding | Setup-Patch (Firebase + Worker live, Version-Bump 0.1.0 → 0.1a → 0.1b), BUG-001 (Identity-Modal Empty-State) Quickfix | App live auf GitHub Pages; Firebase `vogelsicht-ez` + Worker `holy-forest-0174` verbunden; Identity-Onboarding aus Empty-State funktioniert; 4 Strategie-Themen für Phase-B-Discovery eskaliert |
 | **S2** | 2026-06-05 | Strategie | Salimata-Feedback verarbeitet (zwei Inputs), ZFSG-Vorlagen-Analyse (Report + HTML), strategischer Pivot von „sb8-Port" zu „Pivot-Tabelle nach Salimatas Sheet", Briefing S2 produziert (`briefing_S2_pitch_features.md`, 2 Etappen) | Briefing übergabe-fertig an Claude Code CLI; nächstes: S3 App-Coding (Etappe 1 v0.2.0); S4 Strategie nach Salimata-Preview |
+| **S3** | 2026-06-06–10 | App-Coding | Briefing S2 Etappe 1 komplett: Auth-Layer + Login-Screen + Settings-Tab (S3.1, inkl. 2 UX-Fix-Runden nach Live-Smoke), Pivot-Tabelle + EZ-Seed (S3.2), Cockpit-Monitoring + Polish (S3.3). DB-Rules auf `auth != null` (Osi). Toast-System eingeführt. v0.1b → v0.2.0.2026-06-10 | **v0.2.0 live + geseedet, bereit für Salimata-Preview.** Etappe 2 (Clockify) wartet auf Preview-Feedback |
 
 ---
 
@@ -316,6 +317,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 | 0.1.0 | 2026-05-20 | Initial: Fork aus ZFSG v3.19, Finanzen raus, EZ-Branding, Service-Produkt-Konfiguration extrahiert. Placeholders für Firebase/Worker. |
 | 0.1a.2026-05-21 | 2026-05-21 | S1 Setup-Patch: Firebase-Config (`vogelsicht-ez`, europe-west1) + Worker-URL eingesetzt, Versions-Schema-Migration. Erste Live-Version auf GitHub Pages. |
 | 0.1b.2026-05-21 | 2026-05-21 | S1 BUG-001-Quickfix: Identity-Modal Empty-State Onboarding (`+ Person anlegen` inline im Modal). Phase-A-Notlauf-konform, keine Settings-Architektur vorweggenommen. |
+| 0.2.0.2026-06-10 | 2026-06-10 | S3 Etappe 1 (Briefing S2): Firebase Auth E-Mail/Passwort als Login-Gate, Login-Screen, Settings-Tab (Tagessoll in `appConfig` per A14, Personen-E-Mail-Mapping, Seed-Button), Account-Popover, Toast-System, Aufwandsplanung-Pivot (Person × Kategorie × Woche/Monat, Kapazitäts-Block, Notizen, kollabierbare Kategorien), EZ-Seed (9 Personen / 26 Projekte / Kapazität Mai+Juni), Cockpit: Auslastung diese Woche + Auftrags-Rentabilität. Identity-Modal entfernt. DB-Rules `auth != null`. |
 
 ---
 

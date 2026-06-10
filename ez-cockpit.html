@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="app-version" content="0.2.0.2026-06-10">
+<meta name="app-version" content="0.2a.2026-06-10">
 <title>Expedition Zukunft · Cockpit</title>
 
 <!-- Marken-Schrift (Darker Grotesque, via Google Fonts) -->
@@ -1328,6 +1328,72 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 .rp-note-popover .rp-note-meta { font-size: 10px; color: var(--app-text-muted); }
 .rp-note-popover .rp-note-btn { padding: 4px 10px; font-size: 11px; cursor: pointer; background: var(--app-primary); color: #fff; border: none; border-radius: 4px; }
 .rp-note-popover .rp-note-btn-del { background: transparent; color: var(--app-danger); }
+
+/* ============================================================ */
+/* === S3.4 v0.2a — Clockify-Onboarding-Wizard =============== */
+/* ============================================================ */
+.cw-steps {
+  display: flex; gap: 4px; margin-bottom: 16px;
+}
+.cw-steps .cw-step-dot {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: var(--app-border);
+}
+.cw-steps .cw-step-dot.done { background: var(--app-primary); }
+.cw-step-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.cw-step-sub { font-size: 12px; color: var(--app-text-muted); margin-bottom: 14px; }
+.cw-guide {
+  background: var(--app-bg-alt); border-radius: 6px;
+  padding: 12px 14px; font-size: 12px; margin-bottom: 14px;
+  line-height: 1.7;
+}
+.cw-guide ol { margin: 0; padding-left: 18px; }
+.cw-guide a { color: var(--app-primary); font-weight: 500; }
+.cw-error { font-size: 12px; color: var(--app-danger); min-height: 16px; margin: 8px 0; }
+.cw-ok { font-size: 12px; color: #2a9b4f; margin: 8px 0; }
+.cw-map-row {
+  display: flex; align-items: center; gap: 10px; padding: 5px 0;
+  font-size: 12px;
+}
+.cw-map-row label { min-width: 150px; }
+.cw-map-row select {
+  flex: 1; padding: 5px 8px; font-size: 12px;
+  border: 1px solid var(--app-border); border-radius: 4px;
+  max-width: 280px;
+}
+.cw-map-row .cw-auto { font-size: 10px; color: #2a9b4f; }
+.cw-actions { display: flex; justify-content: space-between; margin-top: 18px; }
+.cw-success {
+  text-align: center; padding: 24px 12px;
+}
+.cw-success .cw-emoji {
+  font-size: 56px; display: inline-block;
+  animation: cwPop 600ms cubic-bezier(0.18, 1.4, 0.4, 1);
+}
+@keyframes cwPop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.cw-success h2 { font-size: 20px; margin: 12px 0 4px; }
+.cw-success .cw-sub { font-size: 13px; color: var(--app-text-muted); margin-bottom: 18px; }
+.cw-spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid var(--app-border); border-top-color: var(--app-primary);
+  border-radius: 50%; animation: cwSpin 700ms linear infinite;
+  vertical-align: -2px; margin-right: 6px;
+}
+@keyframes cwSpin { to { transform: rotate(360deg); } }
+.clockify-status-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border: 1px solid var(--app-border);
+  border-radius: 6px; font-size: 12px;
+}
+.clockify-status-card .csc-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--app-border); flex-shrink: 0;
+}
+.clockify-status-card .csc-dot.on { background: #2a9b4f; }
 </style>
 </head>
 <body>
@@ -2178,6 +2244,14 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   </div>
 </div>
 
+<!-- CLOCKIFY-ONBOARDING WIZARD (S3.4 v0.2a — Self-Service für Salimata) -->
+<div class="modal-overlay" id="clockifyWizardModal">
+  <div class="modal" style="max-width:560px">
+    <h3>Clockify verbinden</h3>
+    <div id="cwBody"></div>
+  </div>
+</div>
+
 <!-- INBOX-OVERLAY (Fullscreen Cards-Review) -->
 <div class="inbox-overlay" id="inboxOverlay">
   <div class="inbox-modal">
@@ -2242,7 +2316,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 //
 const APP_BRAND  = "Expedition Zukunft";   // Wird im Header und in JSON-Export verwendet
 const APP_SLUG   = "ez";                    // Filename-Prefix für CSV/JSON-Exporte
-const APP_VERSION = "0.2.0.2026-06-10";      // Wird im Footer angezeigt
+const APP_VERSION = "0.2a.2026-06-10";       // Wird im Footer angezeigt
 const ROOT_NODE  = "ezcockpit";             // Firebase root-Knoten (alle Daten leben hier drunter)
 const LEGACY_TIME_NODE = "ezarbeitsjournal";// Firebase root für Time-Tracking (separat, für künftige Migration)
 
@@ -2310,6 +2384,7 @@ let STATE = {
   effortEstimates: {},         // {personName: {weekKey: {projectId: {hours, note}}}}
   appConfig: { tagessoll: 8.4 }, // geteilte Konfig (A14): Tagessoll, Feature-Flags, etc.
   personsData: {},             // {personName: {email, …}} — Auth-Mapping
+  clockifyConfig: null,        // S3.4 v0.2a: {apiKey, workspaceId, personMapping, projectMapping, lastSync}
   // UI-State (lokal)
   activeLayer: null,
   invoicePreview: null,
@@ -2682,6 +2757,8 @@ function renderSettings() {
       <div class="settings-hint" style="margin-bottom:8px">Jede Person bekommt ihre Firebase-Auth-E-Mail zugeordnet. Pflege das initial einmal, danach matcht der Login automatisch.</div>
       ${personRows}
     </div>
+
+    ${typeof renderClockifySettingsSection === 'function' ? renderClockifySettingsSection() : ''}
 
     <div class="settings-section">
       <h3>Seed-Daten (Phase A)</h3>
@@ -3305,9 +3382,13 @@ function renderAuftragsRentabilitaet() {
       <td style="white-space:nowrap">${badge} ${Math.round(pct * 100)}%</td>
     </tr>`;
   }).join('');
+  const cwConnected = !!(STATE.clockifyConfig && STATE.clockifyConfig.apiKey);
+  const cwHint = cwConnected
+    ? `<div style="font-size:10px;color:var(--app-text-muted);margin-top:4px">Geleistet = Clockify-Sync${STATE.clockifyConfig.lastSync ? ' · zuletzt ' + esc(new Date(STATE.clockifyConfig.lastSync).toLocaleString('de-CH')) : ''} + manuelle Einträge mit Projekt</div>`
+    : `<div style="font-size:11px;margin-top:4px">💡 Ist-Stunden automatisch aus Clockify? <a style="cursor:pointer;color:var(--app-primary);font-weight:500" onclick="openClockifyWizard(1)">Jetzt verbinden</a> — dauert 2 Minuten.</div>`;
   el.innerHTML = `<div class="rp-table-wrapper"><table class="rp-table" style="font-size:11px"><thead><tr>
     <th style="text-align:left">Auftrag</th><th>Offeriert (d)</th><th>Geplant Σ</th><th>Geleistet Σ</th><th>Status</th>
-    </tr></thead><tbody>${rows}</tbody></table></div>`;
+    </tr></thead><tbody>${rows}</tbody></table></div>${cwHint}`;
 }
 function handleOfferierteTageSave(input) {
   const id = input.dataset.id;
@@ -3409,6 +3490,420 @@ function seedEzData() {
   }).catch(err => {
     showToast('Seed fehlgeschlagen: ' + (err.message || err), 'error');
   }).finally(() => { if (btn) btn.disabled = false; });
+}
+
+// =================================================================
+// ============ S3.4 — CLOCKIFY-INTEGRATION (v0.2a) ================
+// =================================================================
+// Self-Service-Onboarding: Salimata holt ihren Clockify-API-Key und der Wizard
+// führt sie durch Key → Personen-Mapping → Projekt-Mapping → erster Sync.
+// Key liegt danach in clockifyConfig/apiKey (Firebase, hinter Auth-Login) —
+// bewusster Phase-A-Tradeoff für Self-Service; Phase-B-Härtung: Worker-Secret-only.
+// Alle Clockify-Calls laufen über den Worker (/clockify/*, Header X-Clockify-Key),
+// nie direkt vom Browser zur Clockify-API.
+
+let CW = null;  // Wizard-State (nur während offenem Wizard)
+
+function cwWorkerFetch(path, apiKey) {
+  return fetch(ANTHROPIC_PROXY_URL + '/clockify' + path, {
+    headers: { 'X-Clockify-Key': apiKey }
+  }).catch(() => {
+    // CORS-Preflight-Fail oder Netz weg — alter Worker erlaubt X-Clockify-Key nicht
+    throw new Error('Verbindung zum Cockpit-Worker fehlgeschlagen. Entweder ist das Internet weg, oder der Worker braucht noch das Clockify-Update (worker.js neu deployen — Osi Bescheid geben).');
+  }).then(async r => {
+    if (!r.ok) {
+      let msg = 'HTTP ' + r.status;
+      try { const j = await r.json(); msg = j.error || j.message || msg; } catch(e) {}
+      if (r.status === 401) msg = 'API-Key ungültig — bitte in Clockify neu generieren und nochmal einfügen.';
+      if (r.status === 405 || r.status === 404) msg = 'Der Worker kennt /clockify noch nicht — Osi muss den aktualisierten worker.js deployen.';
+      if (r.status === 429) msg = 'Clockify-Rate-Limit erreicht — kurz warten und nochmal versuchen.';
+      throw new Error(msg);
+    }
+    return r.json();
+  });
+}
+
+function cwDurationToHours(iso) {
+  if (!iso) return 0;
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return 0;
+  return parseInt(m[1] || 0) + parseInt(m[2] || 0) / 60 + parseInt(m[3] || 0) / 3600;
+}
+
+// Buchbare EZ-Projekte (leaf/space/auftrag) flach, gruppiert nach Top-Kategorie
+function cwBookableProjects() {
+  const out = [];
+  rpProjectChildren(null).forEach(([catId, cat]) => {
+    rpProjectChildren(catId).forEach(([cid, c]) => {
+      if (c.type === 'subcategory') {
+        rpProjectChildren(cid).forEach(([lid, l]) => out.push({ id: lid, title: l.title, group: cat.title, type: l.type }));
+      } else {
+        out.push({ id: cid, title: c.title, group: cat.title, type: c.type });
+      }
+    });
+  });
+  return out;
+}
+
+function openClockifyWizard(startStep) {
+  const cfg = STATE.clockifyConfig || {};
+  CW = {
+    step: 1,
+    apiKey: cfg.apiKey || '',
+    user: null,
+    workspaces: [],
+    workspaceId: cfg.workspaceId || null,
+    workspaceName: cfg.workspaceName || '',
+    cfUsers: [],
+    cfProjects: [],
+    personMapping: Object.assign({}, cfg.personMapping || {}),
+    projectMapping: Object.assign({}, cfg.projectMapping || {}),
+    busy: false,
+    error: '',
+    syncResult: null
+  };
+  renderClockifyWizard();
+  openModal('clockifyWizardModal');
+  // "Mapping bearbeiten": Key existiert schon → direkt Workspace-Daten laden, Step 2
+  if (startStep >= 2 && CW.apiKey && CW.workspaceId) {
+    CW.step = 2;
+    cwLoadWorkspaceData();
+  }
+}
+function closeClockifyWizard() {
+  closeModal('clockifyWizardModal');
+  CW = null;
+}
+
+async function cwTestKey() {
+  const input = document.getElementById('cwApiKey');
+  CW.apiKey = (input ? input.value : '').trim();
+  CW.error = '';
+  if (!CW.apiKey) { CW.error = 'Bitte zuerst den API-Key einfügen.'; renderClockifyWizard(); return; }
+  CW.busy = true; renderClockifyWizard();
+  try {
+    const results = await Promise.all([
+      cwWorkerFetch('/user', CW.apiKey),
+      cwWorkerFetch('/workspaces', CW.apiKey)
+    ]);
+    CW.user = results[0];
+    CW.workspaces = results[1] || [];
+    if (!CW.workspaces.length) throw new Error('Auf diesem Clockify-Account gibt es keine Workspaces.');
+    const active = CW.workspaces.find(w => w.id === CW.user.activeWorkspace) || CW.workspaces[0];
+    CW.workspaceId = active.id;
+    CW.workspaceName = active.name;
+    CW.busy = false;
+    CW.step = 2;
+    renderClockifyWizard();
+    await cwLoadWorkspaceData();
+  } catch (e) {
+    CW.busy = false;
+    CW.error = e.message || String(e);
+    renderClockifyWizard();
+  }
+}
+
+async function cwLoadWorkspaceData() {
+  CW.busy = true; renderClockifyWizard();
+  try {
+    const results = await Promise.all([
+      cwWorkerFetch('/workspaces/' + CW.workspaceId + '/users?page-size=100', CW.apiKey),
+      cwWorkerFetch('/workspaces/' + CW.workspaceId + '/projects?page-size=200', CW.apiKey)
+    ]);
+    CW.cfUsers = results[0] || [];
+    CW.cfProjects = results[1] || [];
+    cwAutoMatch();
+    CW.error = '';
+  } catch (e) {
+    CW.error = e.message || String(e);
+  }
+  CW.busy = false;
+  renderClockifyWizard();
+}
+
+// Auto-Match: Personen via E-Mail (personsData) dann Namens-Heuristik;
+// Projekte via Titel-Gleichheit dann Substring. Füllt nur leere Mappings.
+function cwAutoMatch() {
+  (STATE.persons || []).forEach(name => {
+    if (CW.personMapping[name]) return;
+    const email = (STATE.personsData?.[name]?.email || '').toLowerCase();
+    let u = email ? CW.cfUsers.find(x => (x.email || '').toLowerCase() === email) : null;
+    if (!u) {
+      const n = name.toLowerCase();
+      u = CW.cfUsers.find(x => (x.name || '').toLowerCase().indexOf(n) >= 0);
+    }
+    if (u) { CW.personMapping[name] = u.id; CW.personMapping['_auto_' + name] = true; }
+  });
+  cwBookableProjects().forEach(p => {
+    if (CW.projectMapping[p.id]) return;
+    const t = p.title.toLowerCase().trim();
+    let cf = CW.cfProjects.find(x => (x.name || '').toLowerCase().trim() === t);
+    if (!cf) cf = CW.cfProjects.find(x => {
+      const n = (x.name || '').toLowerCase().trim();
+      return n && (n.indexOf(t) >= 0 || t.indexOf(n) >= 0);
+    });
+    if (cf) { CW.projectMapping[p.id] = cf.id; CW.projectMapping['_auto_' + p.id] = true; }
+  });
+}
+
+function cwSetPersonMapping(sel) {
+  CW.personMapping[sel.dataset.name] = sel.value || null;
+  delete CW.personMapping['_auto_' + sel.dataset.name];
+}
+function cwSetProjectMapping(sel) {
+  CW.projectMapping[sel.dataset.pid] = sel.value || null;
+  delete CW.projectMapping['_auto_' + sel.dataset.pid];
+}
+function cwBack() { if (CW.step > 1) { CW.step--; CW.error = ''; renderClockifyWizard(); } }
+function cwNext() { CW.step++; CW.error = ''; renderClockifyWizard(); }
+
+function renderClockifyWizard() {
+  const body = document.getElementById('cwBody');
+  if (!body || !CW) return;
+  const dots = [1, 2, 3, 4].map(i => `<div class="cw-step-dot ${CW.step >= i ? 'done' : ''}"></div>`).join('');
+  const err = `<div class="cw-error">${esc(CW.error || '')}</div>`;
+  const busyHtml = CW.busy ? '<span class="cw-spinner"></span>' : '';
+  let html = `<div class="cw-steps">${dots}</div>`;
+
+  if (CW.step === 1) {
+    html += `
+      <div class="cw-step-title">Schritt 1 · Dein Clockify-API-Key</div>
+      <div class="cw-step-sub">Der Key verbindet das Cockpit mit eurem Clockify — einmalig einrichten, danach läuft alles automatisch.</div>
+      <div class="cw-guide"><ol>
+        <li><a href="https://app.clockify.me/user/preferences#advanced" target="_blank" rel="noopener">Clockify-Profileinstellungen öffnen ↗</a> (du musst in Clockify eingeloggt sein)</li>
+        <li>Ganz unten bei <b>„API"</b> → <b>Generate</b> klicken (falls noch keiner da ist) und den Key kopieren</li>
+        <li>Hier unten einfügen → <b>Verbindung testen</b></li>
+      </ol></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="password" id="cwApiKey" value="${esc(CW.apiKey)}" placeholder="API-Key einfügen…"
+               style="flex:1;padding:8px 10px;font-size:13px;border:1px solid var(--app-border);border-radius:4px"
+               onkeydown="if(event.key==='Enter')cwTestKey()">
+        <button class="btn btn-primary" onclick="cwTestKey()" ${CW.busy ? 'disabled' : ''}>${busyHtml}Verbindung testen</button>
+      </div>
+      <div style="font-size:11px;color:var(--app-text-muted);margin-top:8px">
+        Hinweis: am besten den Key einer Person mit Clockify-Admin-Rechten — sonst sind nur die eigenen Zeiteinträge sichtbar.
+      </div>
+      ${err}
+      <div class="cw-actions"><button class="btn" onclick="closeClockifyWizard()">Abbrechen</button><span></span></div>`;
+  }
+
+  else if (CW.step === 2) {
+    const wsOptions = CW.workspaces.map(w =>
+      `<option value="${w.id}" ${w.id === CW.workspaceId ? 'selected' : ''}>${esc(w.name)}</option>`).join('');
+    const rows = (STATE.persons || []).map(name => {
+      const sel = CW.personMapping[name] || '';
+      const isAuto = !!CW.personMapping['_auto_' + name];
+      const opts = '<option value="">— nicht zuordnen —</option>' + CW.cfUsers.map(u =>
+        `<option value="${u.id}" ${u.id === sel ? 'selected' : ''}>${esc(u.name || u.email)}</option>`).join('');
+      return `<div class="cw-map-row"><label>${esc(name)}</label>
+        <select data-name="${esc(name)}" onchange="cwSetPersonMapping(this)">${opts}</select>
+        ${isAuto ? '<span class="cw-auto">✓ auto</span>' : ''}</div>`;
+    }).join('');
+    html += `
+      <div class="cw-step-title">Schritt 2 · Wer ist wer? ${busyHtml}</div>
+      <div class="cw-step-sub">Hallo ${esc(CW.user?.name || '')}! Ordne den Cockpit-Personen ihre Clockify-Accounts zu — Vorschläge sind schon gesetzt.</div>
+      ${CW.workspaces.length > 1 ? `<div class="cw-map-row"><label>Workspace</label>
+        <select onchange="CW.workspaceId=this.value;CW.workspaceName=this.options[this.selectedIndex].text;cwLoadWorkspaceData()">${wsOptions}</select></div><hr style="border:none;border-top:1px solid var(--app-border);margin:10px 0">` : ''}
+      <div style="max-height:280px;overflow-y:auto">${rows}</div>
+      ${err}
+      <div class="cw-actions">
+        <button class="btn" onclick="cwBack()">← Zurück</button>
+        <button class="btn btn-primary" onclick="cwNext()" ${CW.busy ? 'disabled' : ''}>Weiter →</button>
+      </div>`;
+  }
+
+  else if (CW.step === 3) {
+    const groups = {};
+    cwBookableProjects().forEach(p => { (groups[p.group] = groups[p.group] || []).push(p); });
+    const cfOpts = (sel) => '<option value="">— nicht zuordnen —</option>' + CW.cfProjects.map(cp =>
+      `<option value="${cp.id}" ${cp.id === sel ? 'selected' : ''}>${esc(cp.name)}</option>`).join('');
+    const rows = Object.entries(groups).map(([g, list]) =>
+      `<div style="font-size:10px;color:var(--app-text-muted);text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 2px">${esc(g)}</div>` +
+      list.map(p => {
+        const isAuto = !!CW.projectMapping['_auto_' + p.id];
+        return `<div class="cw-map-row"><label>${esc(p.title)}</label>
+          <select data-pid="${p.id}" onchange="cwSetProjectMapping(this)">${cfOpts(CW.projectMapping[p.id] || '')}</select>
+          ${isAuto ? '<span class="cw-auto">✓ auto</span>' : ''}</div>`;
+      }).join('')
+    ).join('');
+    html += `
+      <div class="cw-step-title">Schritt 3 · Projekte zuordnen</div>
+      <div class="cw-step-sub">Welches Clockify-Projekt gehört zu welchem Cockpit-Projekt? Nur zugeordnete Projekte fliessen in die Auftrags-Rentabilität. Rest kannst du leer lassen.</div>
+      <div style="max-height:300px;overflow-y:auto">${rows}</div>
+      ${err}
+      <div class="cw-actions">
+        <button class="btn" onclick="cwBack()">← Zurück</button>
+        <button class="btn btn-primary" onclick="cwNext()">Weiter →</button>
+      </div>`;
+  }
+
+  else if (CW.step === 4) {
+    const nPersons = (STATE.persons || []).filter(n => CW.personMapping[n]).length;
+    const nProjects = cwBookableProjects().filter(p => CW.projectMapping[p.id]).length;
+    html += `
+      <div class="cw-step-title">Schritt 4 · Verbinden</div>
+      <div class="cw-step-sub">Alles bereit. Beim Verbinden werden die Clockify-Zeiteinträge der letzten 14 Tage importiert — danach synct das Cockpit automatisch weiter.</div>
+      <div class="cw-guide">
+        Workspace: <b>${esc(CW.workspaceName)}</b><br>
+        ${nPersons} Person(en) zugeordnet · ${nProjects} Projekt(e) zugeordnet
+        ${nPersons === 0 ? '<br><span style="color:var(--app-danger)">⚠ Ohne Personen-Zuordnung kann nichts importiert werden — zurück zu Schritt 2.</span>' : ''}
+      </div>
+      ${err}
+      <div class="cw-actions">
+        <button class="btn" onclick="cwBack()">← Zurück</button>
+        <button class="btn btn-primary" onclick="cwFinish()" ${CW.busy || nPersons === 0 ? 'disabled' : ''}>${busyHtml}Verbinden & ersten Sync starten</button>
+      </div>`;
+  }
+
+  else if (CW.step === 5) {
+    const r = CW.syncResult || { added: 0, skipped: 0, errors: [] };
+    html += `
+      <div class="cw-success">
+        <span class="cw-emoji">🎉</span>
+        <h2>Clockify ist verbunden!</h2>
+        <div class="cw-sub">
+          <b>${r.added}</b> Zeiteinträge aus den letzten 14 Tagen importiert${r.skipped ? ` (${r.skipped} schon vorhanden/übersprungen)` : ''}.<br>
+          Die „Geleistet"-Spalte in der Auftrags-Rentabilität ist jetzt live.
+          ${r.errors && r.errors.length ? `<br><span style="color:var(--app-danger)">Hinweise: ${esc(r.errors.join(' · '))}</span>` : ''}
+        </div>
+        <button class="btn btn-primary" onclick="closeClockifyWizard(); switchToTab('cockpit')">Zur Rentabilität →</button>
+        <button class="btn" onclick="closeClockifyWizard()">Fertig</button>
+      </div>`;
+  }
+
+  body.innerHTML = html;
+}
+
+async function cwFinish() {
+  CW.busy = true; CW.error = ''; renderClockifyWizard();
+  try {
+    // _auto_-Marker nicht persistieren
+    const cleanMap = (m) => {
+      const out = {};
+      Object.keys(m).forEach(k => { if (k.indexOf('_auto_') !== 0 && m[k]) out[k] = m[k]; });
+      return out;
+    };
+    await db.ref(ROOT_NODE + '/clockifyConfig').update({
+      apiKey: CW.apiKey,
+      workspaceId: CW.workspaceId,
+      workspaceName: CW.workspaceName,
+      personMapping: cleanMap(CW.personMapping),
+      projectMapping: cleanMap(CW.projectMapping),
+      connectedBy: currentPersonName || (currentAuthUser ? currentAuthUser.email : 'unbekannt'),
+      connectedAt: new Date().toISOString()
+    });
+    // STATE.clockifyConfig kommt asynchron via Listener — für den Sofort-Sync kurz warten
+    await new Promise(res => setTimeout(res, 600));
+    CW.syncResult = await manualClockifySync();
+    CW.step = 5;
+  } catch (e) {
+    CW.error = e.message || String(e);
+  }
+  CW.busy = false;
+  renderClockifyWizard();
+}
+
+// Manual-Sync (B1: Promise<{added, skipped, errors[]}>) — auch vom Settings-Button
+async function manualClockifySync() {
+  const cfg = STATE.clockifyConfig || {};
+  if (!cfg.apiKey || !cfg.workspaceId) throw new Error('Clockify ist nicht konfiguriert.');
+  const mapped = Object.entries(cfg.personMapping || {}).filter(p => p[1]);
+  if (!mapped.length) throw new Error('Keine Person zugeordnet — Mapping in den Einstellungen pflegen.');
+  const start = new Date(Date.now() - 14 * 86400000).toISOString();
+  const end = new Date().toISOString();
+  const knownIds = new Set(Object.values(STATE.timeEntries || {}).map(e => e && e.clockifyEntryId).filter(Boolean));
+  const projReverse = {};
+  Object.entries(cfg.projectMapping || {}).forEach(([ezId, cfId]) => { if (cfId) projReverse[cfId] = ezId; });
+  let added = 0, skipped = 0;
+  const errors = [];
+  for (const [name, uid] of mapped) {
+    try {
+      const entries = await cwWorkerFetch('/workspaces/' + cfg.workspaceId + '/user/' + uid +
+        '/time-entries?start=' + encodeURIComponent(start) + '&end=' + encodeURIComponent(end) + '&page-size=200', cfg.apiKey);
+      for (const ce of (entries || [])) {
+        if (!ce || !ce.id || knownIds.has(ce.id)) { skipped++; continue; }
+        const hours = cwDurationToHours(ce.timeInterval && ce.timeInterval.duration);
+        if (hours <= 0) { skipped++; continue; }   // laufende Timer überspringen
+        const entry = {
+          date: (ce.timeInterval.start || '').slice(0, 10),
+          persons: [name],
+          hours: ezRound2(hours),
+          category: '',
+          description: ce.description || '',
+          source: 'clockify',
+          clockifyEntryId: ce.id,
+          createdAt: new Date().toISOString()
+        };
+        const ezPid = ce.projectId ? projReverse[ce.projectId] : null;
+        if (ezPid) entry.projectId = ezPid;
+        await db.ref(LEGACY_TIME_NODE + '/entries').push(entry);
+        knownIds.add(ce.id);
+        added++;
+      }
+    } catch (e) {
+      errors.push(name + ': ' + (e.message || e));
+    }
+  }
+  await db.ref(ROOT_NODE + '/clockifyConfig').update({
+    lastSync: new Date().toISOString(),
+    lastSyncResult: { added: added, skipped: skipped, errors: errors.length ? errors : null, via: 'manual' }
+  });
+  return { added: added, skipped: skipped, errors: errors };
+}
+
+function handleManualSync(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Synchronisiere…'; }
+  manualClockifySync().then(r => {
+    showToast(`Clockify-Sync: ${r.added} neu importiert${r.skipped ? ', ' + r.skipped + ' übersprungen' : ''}.`,
+      r.errors.length ? 'error' : 'success');
+    if (r.errors.length) console.warn('Clockify-Sync-Fehler:', r.errors);
+  }).catch(err => {
+    showToast('Sync fehlgeschlagen: ' + (err.message || err), 'error');
+  }).finally(() => { if (typeof renderSettings === 'function') renderSettings(); });
+}
+
+function handleClockifyDisconnect() {
+  if (!confirm('Clockify-Verbindung trennen? Bereits importierte Zeiteinträge bleiben erhalten — nur Key und Mapping werden entfernt.')) return;
+  db.ref(ROOT_NODE + '/clockifyConfig').remove()
+    .then(() => showToast('Clockify-Verbindung getrennt.', 'success'))
+    .catch(err => showToast('Trennen fehlgeschlagen: ' + (err.message || err), 'error'));
+}
+
+// Settings-Sektion (wird von renderSettings eingebettet)
+function renderClockifySettingsSection() {
+  const cfg = STATE.clockifyConfig;
+  const connected = !!(cfg && cfg.apiKey && cfg.workspaceId);
+  if (!connected) {
+    return `
+    <div class="settings-section">
+      <h3>Clockify-Integration</h3>
+      <div class="clockify-status-card">
+        <span class="csc-dot"></span>
+        <span style="flex:1">Noch nicht verbunden. Verbinde euer Clockify, damit die Ist-Stunden automatisch ins Cockpit fliessen — dauert ~2 Minuten, du brauchst nur deinen Clockify-Login.</span>
+        <button class="btn btn-primary" onclick="openClockifyWizard(1)">🔗 Clockify verbinden</button>
+      </div>
+    </div>`;
+  }
+  const last = cfg.lastSync ? new Date(cfg.lastSync).toLocaleString('de-CH') : 'noch nie';
+  const lr = cfg.lastSyncResult;
+  const lrText = lr ? `${lr.added} neu, ${lr.skipped || 0} übersprungen${lr.errors ? ' · ⚠ Fehler (Console)' : ''} (${lr.via === 'cron' ? 'automatisch' : 'manuell'})` : '';
+  return `
+    <div class="settings-section">
+      <h3>Clockify-Integration</h3>
+      <div class="clockify-status-card" style="margin-bottom:10px">
+        <span class="csc-dot on"></span>
+        <span style="flex:1"><b>Verbunden</b> · Workspace „${esc(cfg.workspaceName || cfg.workspaceId)}"<br>
+        <span style="color:var(--app-text-muted)">Letzter Sync: ${esc(last)}${lrText ? ' — ' + esc(lrText) : ''}</span></span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-primary" onclick="handleManualSync(this)">Jetzt synchronisieren</button>
+        <button class="btn btn-sm" onclick="openClockifyWizard(2)">Mapping bearbeiten</button>
+        <button class="btn btn-sm" style="color:var(--app-danger)" onclick="handleClockifyDisconnect()">Trennen</button>
+      </div>
+      <div style="font-size:11px;color:var(--app-text-muted);margin-top:8px">
+        Auto-Sync alle 2h läuft über den Cloudflare-Worker-Cron (sofern von Osi aktiviert). Manueller Sync holt die letzten 14 Tage.
+      </div>
+    </div>`;
 }
 
 const PRIO_LABELS = { high: "Hoch", medium: "Mittel", low: "Niedrig" };
@@ -3601,6 +4096,12 @@ function initFirebase() {
     STATE.personsData = snap.val() || {};
     tryMatchPersonName();
     if (typeof renderSettings === 'function') renderSettings();
+  });
+  // S3.4 v0.2a: Clockify-Konfiguration (apiKey, Mappings, lastSync)
+  db.ref(ROOT_NODE + '/clockifyConfig').on("value", snap => {
+    STATE.clockifyConfig = snap.val() || null;
+    if (typeof renderSettings === 'function') renderSettings();
+    if (typeof renderAuftragsRentabilitaet === 'function') renderAuftragsRentabilitaet();
   });
 }
 
@@ -7444,6 +7945,27 @@ function openTimeEntryModal(id) {
   catSel.innerHTML = '<option value="">—</option>' +
     Object.entries(STATE.timeCategories || {}).map(([cid,c]) => `<option value="${cid}" ${cid===e.category?'selected':''}>${esc(c.name)}</option>`).join("");
 
+  // S3.4: Projekt-Dropdown (gruppiert nach Kategorie, nur buchbare Typen)
+  const projSel = document.getElementById('teProject');
+  if (projSel) {
+    let opts = '<option value="">— kein Projekt —</option>';
+    rpProjectChildren(null).forEach(([catId, cat]) => {
+      const leaves = [];
+      rpProjectChildren(catId).forEach(([cid, c]) => {
+        if (c.type === 'subcategory') {
+          rpProjectChildren(cid).forEach(([lid, l]) => leaves.push([lid, l]));
+        } else {
+          leaves.push([cid, c]);
+        }
+      });
+      if (!leaves.length) return;
+      opts += `<optgroup label="${esc(cat.title)}">` +
+        leaves.map(([lid, l]) => `<option value="${lid}" ${lid === e.projectId ? 'selected' : ''}>${esc(l.title)}</option>`).join('') +
+        `</optgroup>`;
+    });
+    projSel.innerHTML = opts;
+  }
+
   // Personen-Selector
   const pp = document.getElementById('tePersonPills');
   pp.innerHTML = ''; // Reset
@@ -7469,6 +7991,7 @@ function saveTimeEntryEdit() {
     hours,
     category: document.getElementById('teCategory').value,
     description: document.getElementById('teDesc').value.trim(),
+    projectId: document.getElementById('teProject')?.value || null,   // S3.4: Auftrags-Rentabilität
     updated: new Date().toISOString()
   };
   markStateDirty('timeEntries', id, updates);
@@ -10663,6 +11186,7 @@ auth.onAuthStateChanged(handleAuthChange);
       <div class="form-group"><label>Kategorie</label><select id="teCategory"></select></div>
       <div class="form-group"><label>Quelle</label><input type="text" id="teSource" readonly style="background:var(--app-bg-alt);color:var(--app-text-muted)"></div>
     </div>
+    <div class="form-group"><label>Projekt (für Auftrags-Rentabilität)</label><select id="teProject"></select></div>
     <div class="form-group"><label>Beschreibung</label><textarea id="teDesc" rows="3" style="width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--app-border);border-radius:var(--app-radius);background:var(--app-card)"></textarea></div>
     <div class="form-actions">
       <button class="btn btn-danger" onclick="deleteTimeEntryFromModal()" style="margin-right:auto">Löschen</button>
@@ -10673,7 +11197,7 @@ auth.onAuthStateChanged(handleAuthChange);
 </div>
 
 <div style="text-align:center;padding:12px 20px;font-size:10px;color:var(--app-text-muted);border-top:1px solid var(--app-border);margin-top:20px">
-  Expedition Zukunft · Cockpit · v0.2.0.2026-06-10
+  Expedition Zukunft · Cockpit · v0.2a.2026-06-10
 </div>
 </body>
 </html>

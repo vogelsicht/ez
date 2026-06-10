@@ -32,8 +32,7 @@ Plus **Inbox-Workflow** für Transkript-Import (Meeting → LLM → strukturiert
 | File | Version | Zuletzt geändert | Status |
 |---|---|---|---|
 | `ez-cockpit.html` | `0.2a.2026-06-10` | 2026-06-10 (S3) | live: Auth, Settings, Pivot, EZ-Seed, Cockpit-Monitoring + Clockify-Onboarding-Wizard (wartet auf Worker-Deploy für E2E) |
-| `worker.js` | v0.2a (im Repo) | 2026-06-10 (S3) | **⚠ Deploy ausstehend:** Code liegt im Repo, muss von Osi ins Cloudflare-Dashboard kopiert werden. Enthält Anthropic-Proxy (unverändert) + `/clockify/*` + Cron-Handler |
-| (Cloudflare Worker live) | alt (nur Anthropic) | 2026-05-21 (vor S1) | `vogelsicht-ez.holy-forest-0174.workers.dev` — läuft, kennt `/clockify` noch nicht |
+| `worker.js` | v0.2a | 2026-06-10 (S3, deployed von Osi) | ✅ live auf `vogelsicht-ez.holy-forest-0174.workers.dev`: Anthropic-Proxy (Regression-getestet) + `/clockify/*` + Cron `0 */2 * * *` mit `FIREBASE_DB_SECRET` gesetzt |
 
 ---
 

@@ -126,8 +126,8 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 
 ### Offen am Ende S3 (aktuell, Stand v0.2a)
 
-- **worker.js-Deploy durch Osi** ist der Blocker für den Clockify-E2E-Test: Code liegt im Repo (`worker.js`), muss ins Cloudflare-Dashboard kopiert werden (bestehenden Worker-Code ersetzen). `ANTHROPIC_API_KEY`-Secret bleibt erhalten. Danach Co-Lead kurz gegentesten (Regression). Optional für 2h-Auto-Sync: Secret `FIREBASE_DB_SECRET` (Firebase Console → Project Settings → Service Accounts → Database Secrets) + Cron-Trigger `0 */2 * * *`.
-- **Clockify-E2E mit echtem Key** steht aus — der Wizard ist nur bis zur Worker-Grenze getestet (Fehlerpfade). Sobald Worker deployed: Wizard mit Salimatas (oder Test-)Key komplett durchlaufen.
+- ✅ **worker.js deployed** (Osi, 2026-06-10) inkl. `FIREBASE_DB_SECRET` (neues dediziertes DB-Secret) + Cron-Trigger. Verifiziert via curl + Preview: `/clockify` 401-JSON ohne Key, CORS mit `X-Clockify-Key`, Anthropic-Proxy-Regression grün (400 von Anthropic = Pfad intakt), komplette Kette Frontend→Worker→Clockify mit Dummy-Key liefert die freundliche „Key ungültig"-Meldung.
+- **Clockify-E2E mit echtem Key** steht aus — die ganze Infrastruktur ist verifiziert, es fehlt nur noch der echte Wizard-Durchlauf (Salimata beim Preview-Call, oder Osi vorab mit eigenem Clockify-Test-Account).
 - **Salimata-Preview-Call** (BL-006): URL + Login teilen. Ihr Login ist im Personen-Mapping noch NICHT verknüpft — Osi: Settings → Personen-Mapping → `salimata@expeditionzukunft.ch` bei „Salimata" eintragen.
 - **Nur 2 von 9 Auth-Usern angelegt** (hello@oswaldkoenig.ch, salimata@). Rest vor Team-Rollout.
 - **Demo-Beispieldaten in der DB:** Salimata×Admin 1.0d/Juni + Notiz, Pascal×Sprint-MINT 0.5d/Wo, Salimata×VIS 0.25d/Wo, Sprint MINT offeriert=10d. Bewusst dringelassen als Demo-Material.

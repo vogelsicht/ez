@@ -31,8 +31,9 @@ Plus **Inbox-Workflow** für Transkript-Import (Meeting → LLM → strukturiert
 
 | File | Version | Zuletzt geändert | Status |
 |---|---|---|---|
-| `ez-cockpit.html` | `0.2.0.2026-06-10` | 2026-06-10 (S3) | live: Auth (E-Mail/Passwort), Settings-Tab, Aufwandsplanung-Pivot, EZ-Seed geladen, Cockpit-Monitoring. DB-Rules auf `auth != null` |
-| (Cloudflare Worker) | live | 2026-05-21 (vor S1) | `vogelsicht-ez.holy-forest-0174.workers.dev`, Anthropic-Secret gesetzt. Clockify-Endpoint folgt in Etappe 2 |
+| `ez-cockpit.html` | `0.2a.2026-06-10` | 2026-06-10 (S3) | live: Auth, Settings, Pivot, EZ-Seed, Cockpit-Monitoring + Clockify-Onboarding-Wizard (wartet auf Worker-Deploy für E2E) |
+| `worker.js` | v0.2a (im Repo) | 2026-06-10 (S3) | **⚠ Deploy ausstehend:** Code liegt im Repo, muss von Osi ins Cloudflare-Dashboard kopiert werden. Enthält Anthropic-Proxy (unverändert) + `/clockify/*` + Cron-Handler |
+| (Cloudflare Worker live) | alt (nur Anthropic) | 2026-05-21 (vor S1) | `vogelsicht-ez.holy-forest-0174.workers.dev` — läuft, kennt `/clockify` noch nicht |
 
 ---
 
@@ -137,7 +138,7 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 - [x] **BL-003** GitHub-Repo anlegen + GitHub Pages aktivieren ✅ vor S1 (`vogelsicht/ez`)
 - [x] **BL-004** `firebaseConfig` + `ANTHROPIC_PROXY_URL` in `ez-cockpit.html` ersetzen ✅ S1
 - [x] **BL-005** Pitch-Features v0.2.0 + EZ-Seed gemäss `docs/briefing_S2_pitch_features.md` Etappe 1 ✅ S3 (2026-06-10): Auth live, Settings-Tab, Pivot (Person × Kategorie × Woche/Monat, Stunden/Tage), EZ-Seed (9 Personen, 26 Projekte, Kapazität Mai+Juni), Auslastungs- + Rentabilitäts-Monitoring im Cockpit. Eigenständig vorzeigbar — **bereit für Salimata-Preview (BL-006)**.
-- [ ] **BL-005b** Pitch-Features v0.2a gemäss `docs/briefing_S2_pitch_features.md` Etappe 2: Clockify-API-Integration via Worker, Cron-Auto-Sync alle 2h, Manual-Sync-Button, TimeEntry-projectId-Verdrahtung, Auftrags-Rentabilität-Auto. Voraussetzung: BL-005 abgeschlossen.
+- [x] **BL-005b** Pitch-Features v0.2a (Etappe 2) ✅ Code komplett S3 (2026-06-10), **in Onboarding-Variante statt Briefing-Original** (Osi-Entscheid: Salimata gibt Key selbst im Wizard ein → „Yeah"-Moment). Wizard (4 Schritte + Erfolgs-Screen), Manual-Sync, Cron-Handler, TimeEntry-projectId, Rentabilität-Auto. **Offen: worker.js-Deploy (Osi) + E2E-Test mit echtem Key**, optional Cron-Aktivierung + `FIREBASE_DB_SECRET`.
 - [ ] **BL-006** Pre-Pitch-Preview mit Kunden-Tech-Lead (15min Call, Feedback einarbeiten)
 - [ ] **BL-007** Backup-Plan: lokales Demo-Video falls Worker während Pitch streikt
 - [ ] **BL-008** Pitch-Notizen + Talking Points (technisch + Service-Modell + Preise)
@@ -156,6 +157,7 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 - [ ] **BL-013** Frag-Co-Lead-System-Prompt auf EZ-Sprache verfeinern (Policy Sprint, Stakeholder-Konstellation, etc.)
 - [ ] **BL-014** Phasen-Templates für typische EZ-Sprints definieren
 - [ ] **BL-015** Datenmigrations-Plan mit Kunden-Tech-Lead: was wird aus bestehenden Tools (Notion? Trello?) übernommen?
+- [ ] **BL-016** Clockify-Key-Härtung: Key aus `clockifyConfig/apiKey` (Firebase, auth-lesbar — Phase-A-Tradeoff für Self-Service-Onboarding aus S3) migrieren auf Worker-Secret-only; Frontend sieht Key nie mehr. Worker-Proxy nutzt dann nur noch `CLOCKIFY_API_KEY`-Secret.
 
 #### Phase C · Build & Pilot (wartet auf Discovery)
 - [ ] **BL-020** Production-Firebase-Projekt (vs. Demo) — getrennte DB, Auth aktiviert
@@ -168,7 +170,7 @@ Volldetail-Integration siehe `PROJEKT_ANWEISUNGEN.md` §18.
 - [ ] **BL-032** Slack-Integration für Notifications
 - [ ] **BL-033** White-Label-Refactor: zweiter Kunde mit eigenem `APP_BRAND`/`ROOT_NODE`/`:root`
 
-> Nächste BL-Nummer: **BL-010** (Phase A) / **BL-016** (Phase B) / **BL-023** (Phase C) / **BL-034** (Phase D)
+> Nächste BL-Nummer: **BL-010** (Phase A) / **BL-017** (Phase B) / **BL-023** (Phase C) / **BL-034** (Phase D)
 
 #### Eskalations-Bedarf für Strategie-Chat (aus S1 Smoke-Test-Feedback Osi, 2026-05-21)
 
@@ -306,7 +308,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 | **S0** | 2026-05-20 | Strategie (Bootstrap) | Übergabe-Doc analysiert, FB-Setup-Patterns übernommen, 7 Doku-Files generiert, Phase-Plan ratifiziert | EZ-Cockpit-Projekt initialisiert; Phase A startbereit; nächstes: S1 Demo-Sprint-Kickoff |
 | **S1** | 2026-05-21 | App-Coding | Setup-Patch (Firebase + Worker live, Version-Bump 0.1.0 → 0.1a → 0.1b), BUG-001 (Identity-Modal Empty-State) Quickfix | App live auf GitHub Pages; Firebase `vogelsicht-ez` + Worker `holy-forest-0174` verbunden; Identity-Onboarding aus Empty-State funktioniert; 4 Strategie-Themen für Phase-B-Discovery eskaliert |
 | **S2** | 2026-06-05 | Strategie | Salimata-Feedback verarbeitet (zwei Inputs), ZFSG-Vorlagen-Analyse (Report + HTML), strategischer Pivot von „sb8-Port" zu „Pivot-Tabelle nach Salimatas Sheet", Briefing S2 produziert (`briefing_S2_pitch_features.md`, 2 Etappen) | Briefing übergabe-fertig an Claude Code CLI; nächstes: S3 App-Coding (Etappe 1 v0.2.0); S4 Strategie nach Salimata-Preview |
-| **S3** | 2026-06-06–10 | App-Coding | Briefing S2 Etappe 1 komplett: Auth-Layer + Login-Screen + Settings-Tab (S3.1, inkl. 2 UX-Fix-Runden nach Live-Smoke), Pivot-Tabelle + EZ-Seed (S3.2), Cockpit-Monitoring + Polish (S3.3). DB-Rules auf `auth != null` (Osi). Toast-System eingeführt. v0.1b → v0.2.0.2026-06-10 | **v0.2.0 live + geseedet, bereit für Salimata-Preview.** Etappe 2 (Clockify) wartet auf Preview-Feedback |
+| **S3** | 2026-06-06–10 | App-Coding | Briefing S2 **beide Etappen**: Etappe 1 (Auth + Login + Settings + Pivot + EZ-Seed + Cockpit-Monitoring, v0.2.0) und Etappe 2 in Onboarding-Variante (Clockify-Wizard self-service für Salimata, worker.js mit /clockify + Cron ins Repo, v0.2a). DB-Rules `auth != null` (Osi). 2 UX-Fix-Runden nach Live-Smoke. | **v0.2a live, bereit für Salimata-Preview inkl. Clockify-„Yeah"-Moment.** Offen: worker.js-Deploy durch Osi, dann E2E |
 
 ---
 
@@ -318,6 +320,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 | 0.1a.2026-05-21 | 2026-05-21 | S1 Setup-Patch: Firebase-Config (`vogelsicht-ez`, europe-west1) + Worker-URL eingesetzt, Versions-Schema-Migration. Erste Live-Version auf GitHub Pages. |
 | 0.1b.2026-05-21 | 2026-05-21 | S1 BUG-001-Quickfix: Identity-Modal Empty-State Onboarding (`+ Person anlegen` inline im Modal). Phase-A-Notlauf-konform, keine Settings-Architektur vorweggenommen. |
 | 0.2.0.2026-06-10 | 2026-06-10 | S3 Etappe 1 (Briefing S2): Firebase Auth E-Mail/Passwort als Login-Gate, Login-Screen, Settings-Tab (Tagessoll in `appConfig` per A14, Personen-E-Mail-Mapping, Seed-Button), Account-Popover, Toast-System, Aufwandsplanung-Pivot (Person × Kategorie × Woche/Monat, Kapazitäts-Block, Notizen, kollabierbare Kategorien), EZ-Seed (9 Personen / 26 Projekte / Kapazität Mai+Juni), Cockpit: Auslastung diese Woche + Auftrags-Rentabilität. Identity-Modal entfernt. DB-Rules `auth != null`. |
+| 0.2a.2026-06-10 | 2026-06-10 | S3 Etappe 2 (Onboarding-Variante): Clockify-Self-Service-Wizard (Key-Anleitung + Live-Test + Auto-Match Personen/Projekte + Sofort-Sync + 🎉-Screen), Manual-Sync (14 Tage, Dedupe via `clockifyEntryId`), Settings-Clockify-Sektion, TimeEntry-Projekt-Dropdown, Rentabilitäts-Hint. `worker.js` neu im Repo (Anthropic-Proxy + `/clockify/*` + Cron alle 2h). Key in `clockifyConfig` (Phase-A-Tradeoff → BL-016). |
 
 ---
 

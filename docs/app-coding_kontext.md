@@ -96,6 +96,15 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 
 ## Designentscheide
 
+### S3.4 Designentscheide (Clockify, v0.2a)
+
+1. **Onboarding-Variante statt Briefing-Original** (Osi-Entscheid im Chat, 2026-06-10): Salimata gibt ihren Clockify-Key selbst im Wizard ein, statt dass Osi ihn als Worker-Secret hinterlegt. Konsequenz: Key liegt in `clockifyConfig/apiKey` (Firebase, auth-geschützt lesbar für alle eingeloggten User). Bewusster Phase-A-Tradeoff (aktuell 2 User), Härtung als **BL-016** in Phase B. Das Briefing nannte beide Varianten — Self-Service braucht zwingend diese.
+2. **Manual-Sync läuft komplett im Frontend** (eingeloggte Session schreibt selbst nach Firebase) — der „Yeah"-Moment funktioniert dadurch OHNE `FIREBASE_DB_SECRET`. Das Secret braucht nur der Worker-Cron für den 2h-Auto-Sync.
+3. **Worker bleibt abwärtskompatibel:** Anthropic-Proxy-Pfad 1:1 aus Übergabe-Doc §4.2 übernommen (jeder nicht-`/clockify`-POST → Anthropic). Co-Lead-Regression beim Re-Deploy ausgeschlossen, solange `ANTHROPIC_API_KEY`-Secret erhalten bleibt.
+4. **Auto-Match-Heuristik:** Personen via `personsData[name].email` == Clockify-Email, Fallback Namens-Substring; Projekte via Titel exakt, Fallback Substring beidseitig. Nur leere Mappings werden befüllt, `✓ auto`-Marker im UI, User kann übersteuern.
+5. **Laufende Timer übersprungen** (duration=null → 0h → skip) — halbfertige Einträge verfälschen „Geleistet" nicht; sie kommen beim nächsten Sync nach Timer-Stopp.
+6. **Cron-Dedupe lädt Phase-A-pragmatisch die Volltabelle** der Entries (wenige hundert). Bei Wachstum: Firebase-Index auf `clockifyEntryId` (Kommentar im worker.js).
+
 ### S3 Designentscheide
 
 1. **Wochen-View = eine Woche pro Ansicht** (Pfeile steppen wochenweise). Briefing-Beispiel „← KW 19-22 →" war als Range lesbar; Spalten sind aber Personen, also wäre Person×Woche-Matrix 40+ Spalten geworden. Eine-Woche-Ansicht erfüllt den Briefing-Smoke („Mai zeigt KW…, Wert verteilt") und bleibt lesbar.
@@ -115,11 +124,12 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 
 ## Mitnahmen für nächste Session
 
-### Offen am Ende S3 (aktuell)
+### Offen am Ende S3 (aktuell, Stand v0.2a)
 
-- **Salimata-Preview-Call ist der nächste Schritt** (BL-006): URL + Login (`salimata@expeditionzukunft.ch` / Initial-PW) teilen. Ihr Login ist im Personen-Mapping noch NICHT verknüpft — Osi muss in Settings → Personen-Mapping ihre E-Mail bei „Salimata" eintragen, sonst landet sie im „nicht zugeordnet"-Banner.
-- **Etappe 2 (Clockify)** wartet auf Preview-Feedback. Braucht von Osi: Clockify-API-Key als Worker-Secret, Firebase-Admin-Token für Cron (Briefing §3.1).
-- **Nur 2 von 9 Auth-Usern angelegt** (hello@oswaldkoenig.ch, salimata@). Restliche 6 EZ-User vor Team-Rollout anlegen (PW-Schema `ez-demo`).
+- **worker.js-Deploy durch Osi** ist der Blocker für den Clockify-E2E-Test: Code liegt im Repo (`worker.js`), muss ins Cloudflare-Dashboard kopiert werden (bestehenden Worker-Code ersetzen). `ANTHROPIC_API_KEY`-Secret bleibt erhalten. Danach Co-Lead kurz gegentesten (Regression). Optional für 2h-Auto-Sync: Secret `FIREBASE_DB_SECRET` (Firebase Console → Project Settings → Service Accounts → Database Secrets) + Cron-Trigger `0 */2 * * *`.
+- **Clockify-E2E mit echtem Key** steht aus — der Wizard ist nur bis zur Worker-Grenze getestet (Fehlerpfade). Sobald Worker deployed: Wizard mit Salimatas (oder Test-)Key komplett durchlaufen.
+- **Salimata-Preview-Call** (BL-006): URL + Login teilen. Ihr Login ist im Personen-Mapping noch NICHT verknüpft — Osi: Settings → Personen-Mapping → `salimata@expeditionzukunft.ch` bei „Salimata" eintragen.
+- **Nur 2 von 9 Auth-Usern angelegt** (hello@oswaldkoenig.ch, salimata@). Rest vor Team-Rollout.
 - **Demo-Beispieldaten in der DB:** Salimata×Admin 1.0d/Juni + Notiz, Pascal×Sprint-MINT 0.5d/Wo, Salimata×VIS 0.25d/Wo, Sprint MINT offeriert=10d. Bewusst dringelassen als Demo-Material.
 
 ### Drift-Hinweise (S3)
@@ -153,7 +163,7 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 |---|---|---|---|
 | **S0** | **2026-05-20** | 0.1.0 (Übergabe-Stand) | **Bootstrap (kein Code-Patch) · app-coding_kontext initialisiert · Erster Code-Lauf wartet auf S1 (Repo-Init + Firebase + Worker + Config-Replace + Seed-Data)** |
 | **S1** | **2026-05-21** | 0.1.0 → 0.1a → 0.1b.2026-05-21 | **Setup-Patch (firebaseConfig + ANTHROPIC_PROXY_URL + Versions-Bump) → live deployed. BUG-001 Quickfix (Identity-Modal Empty-State Onboarding via Inline-Add). 4 Strategie-Themen für Phase-B-Discovery eskaliert.** |
-| **S3** | **2026-06-06–10** | 0.1b → 0.2.0.2026-06-10 | **Briefing S2 Etappe 1 komplett (4 Pushes): S3.1 Auth-Layer + Login + Settings-Tab; S3.1.1 Toasts + Admin-Mail-Fix + Tab-Bounce-Fix; S3.1.2 Account-Popover; S3.2+S3.3 Pivot-Tabelle + EZ-Seed + Cockpit-Monitoring. DB-Rules `auth != null`. Live-Smoke via Preview gegen Prod-Firebase (eingeloggt). Bereit für Salimata-Preview.** |
+| **S3** | **2026-06-06–10** | 0.1b → 0.2.0 → 0.2a.2026-06-10 | **Briefing S2 beide Etappen (5 Pushes): S3.1 Auth + Login + Settings; S3.1.1 Toasts/Fixes; S3.1.2 Account-Popover; S3.2+S3.3 Pivot + EZ-Seed + Cockpit-Monitoring (v0.2.0); S3.4 Clockify-Self-Service-Wizard + worker.js mit /clockify + Cron (v0.2a, Onboarding-Variante per Osi-Entscheid). DB-Rules `auth != null`. Offen: worker.js-Deploy + E2E.** |
 
 ---
 

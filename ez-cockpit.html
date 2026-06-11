@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="app-version" content="0.2a.2026-06-10">
+<meta name="app-version" content="0.3.0.2026-06-11">
 <title>Expedition Zukunft · Cockpit</title>
 
 <!-- Marken-Schrift (Darker Grotesque, via Google Fonts) -->
@@ -996,7 +996,8 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 .frag-clear-btn:hover { color: var(--app-danger); border-color: var(--app-danger); }
 
 /* Floating Bubble */
-.frag-bubble { position: fixed; bottom: 22px; right: 22px; width: 52px; height: 52px; border-radius: 50%; background: var(--app-tertiary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.16); z-index: 999; transition: all 0.15s; user-select: none; }
+/* S3.5: Bubble rückt über den FAB (beide unten rechts gestapelt) */
+.frag-bubble { position: fixed; bottom: 90px; right: 24px; width: 52px; height: 52px; border-radius: 50%; background: var(--app-tertiary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.16); z-index: 999; transition: all 0.15s; user-select: none; }
 .frag-bubble:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(0,0,0,0.22); }
 .frag-bubble.has-unread::after { content: ''; position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; background: var(--app-secondary); border: 2px solid #fff; border-radius: 50%; }
 
@@ -1394,6 +1395,74 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
   background: var(--app-border); flex-shrink: 0;
 }
 .clockify-status-card .csc-dot.on { background: #2a9b4f; }
+
+/* ============================================================ */
+/* === S3.5 v0.3.0 — FAB (radialer Fächer, ZFSG-v4-Pattern) === */
+/* ============================================================ */
+.fab-root { position: fixed; bottom: 22px; right: 22px; z-index: 998; width: 56px; height: 56px; }
+.fab-main {
+  position: absolute; bottom: 0; right: 0; width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-tertiary) 55%, var(--app-secondary) 100%);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 32px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.20);
+  transition: transform 0.2s; user-select: none; line-height: 1; z-index: 2;
+}
+.fab-main.open { transform: rotate(45deg); }
+.fab-item {
+  position: absolute; bottom: 6px; right: 6px; width: 44px; height: 44px; border-radius: 50%;
+  background: #fff; border: 1px solid var(--app-border);
+  display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.14); opacity: 0; transform: translate(0,0) scale(0.4);
+  transition: transform 0.24s cubic-bezier(.2,.9,.3,1.25), opacity 0.18s;
+  pointer-events: none; z-index: 1;
+}
+.fab-root.open .fab-item { opacity: 1; pointer-events: auto; }
+.fab-root.open .fab-item[data-i="1"] { transform: translate(2px,-104px) scale(1); }
+.fab-root.open .fab-item[data-i="2"] { transform: translate(-42px,-95px) scale(1); }
+.fab-root.open .fab-item[data-i="3"] { transform: translate(-76px,-76px) scale(1); }
+.fab-root.open .fab-item[data-i="4"] { transform: translate(-95px,-42px) scale(1); }
+.fab-root.open .fab-item[data-i="5"] { transform: translate(-104px,2px) scale(1); }
+.fab-item:hover { border-color: var(--app-tertiary); z-index: 10; }
+.fab-ico { pointer-events: none; }
+.fab-label {
+  position: absolute; right: 52px; top: 50%; transform: translateY(-50%);
+  background: var(--app-text-strong); color: #fff; font-size: 11px; padding: 3px 8px;
+  border-radius: 5px; white-space: nowrap; opacity: 0; transition: opacity 0.15s; pointer-events: none;
+}
+.fab-item:hover .fab-label { opacity: 1; }
+@media (max-width: 768px) {
+  .fab-root { bottom: 14px; right: 14px; }
+  .frag-bubble { bottom: 82px; right: 16px; }
+}
+
+/* === S3.5 v0.3.0 — KPI-Kacheln klickbar + Drawer (ZFSG-v4.8-Pattern) === */
+.metric.kpi-clickable { position: relative; cursor: pointer; transition: box-shadow .12s; }
+.metric.kpi-clickable:hover { outline: 1px solid var(--app-tertiary); outline-offset: -1px; box-shadow: 0 1px 6px rgba(0,0,0,.06); }
+.metric-chev { position: absolute; top: 8px; right: 10px; color: var(--app-text-muted); font-size: 15px; opacity: .45; transition: opacity .12s, color .12s; }
+.metric.kpi-clickable:hover .metric-chev { opacity: 1; color: var(--app-tertiary); }
+.kpi-drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; justify-content: flex-end; z-index: 1200; }
+.kpi-drawer-backdrop.show { display: flex; }
+.kpi-drawer {
+  width: 420px; max-width: 92vw; height: 100%; background: #fff;
+  border-left: 1px solid var(--app-border); display: flex; flex-direction: column;
+  box-shadow: -6px 0 24px rgba(0,0,0,.10);
+}
+.kpi-drawer-head { padding: 18px 20px 12px; border-bottom: 1px solid var(--app-border); flex-shrink: 0; }
+.kpi-drawer-label { font-size: 11px; color: var(--app-text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.kpi-drawer-value { font-size: 34px; font-weight: 600; color: var(--app-text-strong); margin-top: 2px; line-height: 1.1; }
+.kpi-drawer-sub { font-size: 12px; color: var(--app-text-muted); margin-top: 6px; }
+.kpi-drawer-x { background: none; border: none; font-size: 24px; line-height: 1; color: var(--app-text-muted); cursor: pointer; padding: 0 2px; }
+.kpi-drawer-x:hover { color: var(--app-text-strong); }
+.kpi-drawer-scroll { flex: 1; overflow-y: auto; padding: 8px 20px 4px; }
+.kpi-sec-title { font-size: 11px; font-weight: 600; color: var(--app-text-muted); text-transform: uppercase; letter-spacing: .04em; margin: 16px 0 4px; }
+.kpi-sec-title:first-child { margin-top: 6px; }
+.kpi-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 7px 8px; border-radius: 6px; font-size: 13px; }
+.kpi-row:hover { background: var(--app-bg-alt); }
+.kpi-row-n { font-weight: 600; color: var(--app-text-strong); min-width: 26px; text-align: right; flex-shrink: 0; }
+.kpi-bar-label { flex: 0 0 38%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-bar-track { flex: 1; height: 7px; background: var(--app-bg-alt); border-radius: 4px; overflow: hidden; }
+.kpi-bar-fill { display: block; height: 100%; background: var(--app-tertiary); border-radius: 4px; }
+.kpi-drawer-cta { margin: 10px 20px 18px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -2316,7 +2385,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 //
 const APP_BRAND  = "Expedition Zukunft";   // Wird im Header und in JSON-Export verwendet
 const APP_SLUG   = "ez";                    // Filename-Prefix für CSV/JSON-Exporte
-const APP_VERSION = "0.2a.2026-06-10";       // Wird im Footer angezeigt
+const APP_VERSION = "0.3.0.2026-06-11";      // Wird im Footer angezeigt
 const ROOT_NODE  = "ezcockpit";             // Firebase root-Knoten (alle Daten leben hier drunter)
 const LEGACY_TIME_NODE = "ezarbeitsjournal";// Firebase root für Time-Tracking (separat, für künftige Migration)
 
@@ -2701,21 +2770,32 @@ function renderSettings() {
   const email = currentAuthUser?.email || '';
   const personName = currentPersonName;
   const isAdmin = email && email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+  const persons = Array.isArray(STATE.persons) ? STATE.persons : [];
+  const tagessoll = getDailyHours();
+  const pd = STATE.personsData || {};
 
-  // Banner: kein Match → User muss verknüpfen
+  // Banner: kein Match → Self-Claim (S3.5): User wählt selbst, wer er ist.
+  // Schreibt personsData[name].email → Listener matcht automatisch, Banner verschwindet.
   if (banner) {
     if (currentAuthUser && !personName) {
-      banner.innerHTML = isAdmin
-        ? `<div class="settings-banner">Admin-Modus: dein Login ist noch keiner Person zugeordnet. Lege unten unter „Personen-Mapping" deine E-Mail-Zuordnung an, oder lade Seed-Daten.</div>`
-        : `<div class="settings-banner danger">Dein Login (${esc(email)}) ist keiner Person zugeordnet. Bitte Osi kontaktieren — oder, falls du Admin bist, unter „Personen-Mapping" verknüpfen.</div>`;
+      const unclaimed = persons.filter(p => !pd[p]?.email);
+      const claimUi = unclaimed.length
+        ? `<div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+             <select id="selfClaimSelect" style="padding:6px 10px;font-size:12px;border:1px solid var(--app-border);border-radius:4px">
+               <option value="">— Name wählen —</option>
+               ${unclaimed.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('')}
+             </select>
+             <button class="btn btn-sm btn-primary" onclick="handleSelfClaim()">Das bin ich →</button>
+           </div>`
+        : `<div style="margin-top:8px;font-size:11px">Alle Personen sind bereits verknüpft — bitte Osi kontaktieren.</div>`;
+      banner.innerHTML = `<div class="settings-banner${isAdmin ? '' : ' danger'}">
+        Dein Login <b>${esc(email)}</b> ist noch keiner Person zugeordnet. Wähle deinen Namen, dann ist dein Konto verknüpft:
+        ${claimUi}
+      </div>`;
     } else {
       banner.innerHTML = '';
     }
   }
-
-  const persons = Array.isArray(STATE.persons) ? STATE.persons : [];
-  const tagessoll = getDailyHours();
-  const pd = STATE.personsData || {};
 
   const personRows = persons.length === 0
     ? `<div class="settings-row"><div class="settings-hint">Noch keine Personen angelegt. Seed-Daten laden (Phase A: Bereich „Seed" unten).</div></div>`
@@ -2759,15 +2839,18 @@ function renderSettings() {
     </div>
 
     ${typeof renderClockifySettingsSection === 'function' ? renderClockifySettingsSection() : ''}
-
-    <div class="settings-section">
-      <h3>Seed-Daten (Phase A)</h3>
-      <div class="settings-row">
-        <span class="settings-hint">EZ-Seed: 8 Personen + Projekt-Hierarchie + Mai-Kapazität. Idempotent (überschreibt nichts).</span>
-        <button class="btn btn-sm" onclick="handleSeedEzData()" id="seedEzBtn">EZ-Seed-Daten laden</button>
-      </div>
-    </div>
   `;
+}
+
+// Self-Claim (S3.5): eingeloggter User ohne Person-Match verknüpft sich selbst.
+function handleSelfClaim() {
+  const name = document.getElementById('selfClaimSelect')?.value;
+  if (!name) { showToast('Bitte zuerst deinen Namen wählen.', 'error'); return; }
+  const email = currentAuthUser?.email;
+  if (!email) return;
+  db.ref(ROOT_NODE + '/personsData/' + name + '/email').set(email)
+    .then(() => showToast(`Verknüpft: ${name} ↔ ${email}`, 'success'))
+    .catch(err => showToast('Verknüpfen fehlgeschlagen: ' + (err.message || err), 'error'));
 }
 
 // Settings: Tagessoll speichern (Bridge zu setDailyHours → Firebase).
@@ -2794,15 +2877,6 @@ function handlePersonEmailSave(input) {
   }).catch(err => {
     showToast("Speichern fehlgeschlagen: " + (err.message || err), "error");
   });
-}
-
-// Settings: Seed-Button — Phase-A-Stub, wird in S3.2 mit echtem seedEzData() befüllt.
-function handleSeedEzData() {
-  if (typeof seedEzData === 'function') {
-    seedEzData();
-  } else {
-    alert("Seed-Funktion noch nicht aktiv — kommt mit S3.2 (Pivot-Tabelle + EZ-Seed).");
-  }
 }
 
 // runMigrations: wrappt die bestehenden one-shot DB-Migrationen die früher top-level
@@ -3422,76 +3496,6 @@ function openAuftragDetail(el) {
   openModal('auftragDetailModal');
 }
 
-// ---------- EZ-Seed (Briefing §2.2 — idempotent via appConfig.seeded) ----------
-function seedEzData() {
-  if (STATE.appConfig?.seeded) {
-    showToast('EZ-Seed bereits geladen — keine Änderungen.', 'info');
-    return Promise.resolve();
-  }
-  const EZ_PERSONS = ["Pascal", "Salimata", "Sandro", "Josephine", "Anton", "Joël", "Mariam", "Saya"];
-  const persons = Array.from(new Set((STATE.persons || []).concat(EZ_PERSONS)));
-  const PROJECTS = {
-    p_internal:   { type: "category", title: "Internal", parentId: null, order: 1 },
-    p_int_admin:  { type: "leaf", title: "Admin", parentId: "p_internal", order: 1 },
-    p_int_team:   { type: "leaf", title: "Teammeeting, Weekly, Roundup", parentId: "p_internal", order: 2 },
-    p_int_anfrag: { type: "leaf", title: "Kurzfristige Anfragen", parentId: "p_internal", order: 3 },
-    p_orga:       { type: "category", title: "Orga-Entwicklung", parentId: null, order: 2 },
-    p_orga_fund:  { type: "leaf", title: "Funding (Fundraising + Aufträge)", parentId: "p_orga", order: 1 },
-    p_orga_event: { type: "leaf", title: "Externe Events / Weiterbildung", parentId: "p_orga", order: 2 },
-    p_orga_komm:  { type: "leaf", title: "Kommunikation", parentId: "p_orga", order: 3 },
-    p_orga_hr:    { type: "leaf", title: "HR, Teambuilding, Büro", parentId: "p_orga", order: 4 },
-    p_orga_strat: { type: "leaf", title: "Strategie / Retraiten, VS etc.", parentId: "p_orga", order: 5 },
-    p_orga_fin:   { type: "leaf", title: "Finanzen/Buchhaltung", parentId: "p_orga", order: 6 },
-    p_orga_konz:  { type: "leaf", title: "Konzeption Formate", parentId: "p_orga", order: 7 },
-    p_orga_intl:  { type: "leaf", title: "Internationalisierung", parentId: "p_orga", order: 8 },
-    p_orga_inst:  { type: "leaf", title: "Institutionalisierung", parentId: "p_orga", order: 9 },
-    p_projekte:   { type: "category", title: "Projekte", parentId: null, order: 3 },
-    p_spaces:     { type: "subcategory", title: "Spaces", parentId: "p_projekte", order: 1 },
-    p_sp_klima:   { type: "space", title: "Klima Scoping", parentId: "p_spaces", order: 1 },
-    p_sp_demok:   { type: "space", title: "Demokratie Scoping & SGG", parentId: "p_spaces", order: 2 },
-    p_auftrage:   { type: "subcategory", title: "Aufträge", parentId: "p_projekte", order: 2 },
-    p_au_mint:    { type: "auftrag", title: "Sprint MINT", parentId: "p_auftrage", offerierteTage: 0, order: 1 },
-    p_au_policy:  { type: "auftrag", title: "Policy Brief", parentId: "p_auftrage", offerierteTage: 0, order: 2 },
-    p_au_fhch:    { type: "auftrag", title: "FH CH", parentId: "p_auftrage", offerierteTage: 0, order: 3 },
-    p_au_innob:   { type: "auftrag", title: "Innobooster New Mobility", parentId: "p_auftrage", offerierteTage: 0, order: 4 },
-    p_au_ttt:     { type: "auftrag", title: "Train-the-Trainer Studienstiftung", parentId: "p_auftrage", offerierteTage: 0, order: 5 },
-    p_au_love:    { type: "auftrag", title: "Love Politics", parentId: "p_auftrage", offerierteTage: 0, order: 6 },
-    p_au_vis:     { type: "auftrag", title: "VIS Mission Salesx", parentId: "p_auftrage", offerierteTage: 0, order: 7 }
-  };
-  const CAP_MAY = {
-    "Pascal":    { arbeitstage: 14.4, ferien: 0,   kompensation: 0 },
-    "Salimata":  { arbeitstage: 14.4, ferien: 1,   kompensation: 2 },
-    "Sandro":    { arbeitstage: 14.4, ferien: 0,   kompensation: 0 },
-    "Josephine": { arbeitstage: 14.4, ferien: 0,   kompensation: 1 },
-    "Anton":     { arbeitstage: 14.4, ferien: 3.3, kompensation: 1 },
-    "Joël":      { arbeitstage: 14.4, ferien: 4,   kompensation: 0 },
-    "Mariam":    { arbeitstage: 14.4, ferien: 0,   kompensation: 0 },
-    "Saya":      { arbeitstage: 14.4, ferien: 1,   kompensation: 1 }
-  };
-  const updates = { persons: persons };
-  Object.keys(PROJECTS).forEach(id => { updates['projects/' + id] = PROJECTS[id]; });
-  EZ_PERSONS.forEach(n => {
-    updates['personCapacity/' + n + '/2026-05'] = CAP_MAY[n];
-    // Juni zusätzlich zur Briefing-Vorgabe (Mai): Demo läuft im Juni, sonst wäre die
-    // Default-Ansicht (aktueller Monat) leer. Neutrale Baseline, Salimata passt an.
-    updates['personCapacity/' + n + '/2026-06'] = { arbeitstage: CAP_MAY[n].arbeitstage, ferien: 0, kompensation: 0 };
-  });
-  // Personalisierter Start-Tab data-driven (A11: Konfiguration statt if-person-Verzweigung)
-  updates['personsData/Salimata/defaultTab'] = 'resourceplanning';
-  updates['appConfig/seeded'] = true;
-  const btn = document.getElementById('seedEzBtn');
-  if (btn) btn.disabled = true;
-  return Promise.all([
-    db.ref(ROOT_NODE).update(updates),
-    // Legacy-Time-Node ist faktisch Source-of-Truth für persons (Listener synct legacy→root)
-    db.ref(LEGACY_TIME_NODE + '/persons').set(persons)
-  ]).then(() => {
-    showToast('EZ-Seed geladen: ' + persons.length + ' Personen, ' + Object.keys(PROJECTS).length + ' Projekte, Kapazität Mai+Juni 2026.', 'success');
-  }).catch(err => {
-    showToast('Seed fehlgeschlagen: ' + (err.message || err), 'error');
-  }).finally(() => { if (btn) btn.disabled = false; });
-}
-
 // =================================================================
 // ============ S3.4 — CLOCKIFY-INTEGRATION (v0.2a) ================
 // =================================================================
@@ -3906,6 +3910,73 @@ function renderClockifySettingsSection() {
     </div>`;
 }
 
+// ============ S3.5 — KPI-DRAWER (Pattern aus ZFSG v4.8, auf --app-* portiert) ============
+// Rechtsseitiger Drilldown hinter den Cockpit-Kacheln. Daten kommen aus window.KPI_DATA
+// (wird in renderCockpit gebaut). Sections-Modell: {title, rows:[{label, n, display?, bar?, danger?}]}.
+function openKpiDrawer(key) {
+  renderKpiDrawer(key);
+  document.getElementById('kpiDrawerBackdrop')?.classList.add('show');
+}
+function closeKpiDrawer() {
+  document.getElementById('kpiDrawerBackdrop')?.classList.remove('show');
+}
+function _kpiSectionHtml(sec) {
+  const max = Math.max(1, ...sec.rows.filter(r => r.bar).map(r => r.n || 0));
+  const rows = sec.rows.length ? sec.rows.map(r => {
+    const nstyle = r.danger ? ' style="color:var(--app-danger)"' : '';
+    const disp = r.display != null ? r.display : r.n;
+    if (r.bar) {
+      return `<div class="kpi-row"><span class="kpi-bar-label">${esc(r.label)}</span><span class="kpi-bar-track"><span class="kpi-bar-fill" style="width:${Math.min(100, Math.round((r.n || 0) / max * 100))}%"></span></span><span class="kpi-row-n"${nstyle}>${disp}</span></div>`;
+    }
+    return `<div class="kpi-row"><span>${esc(r.label)}</span><span class="kpi-row-n"${nstyle}>${disp}</span></div>`;
+  }).join('') : '<div class="kpi-row" style="color:var(--app-text-muted)">—</div>';
+  return `<div class="kpi-sec-title">${esc(sec.title)}</div>${rows}`;
+}
+function renderKpiDrawer(key) {
+  const d = (window.KPI_DATA || {})[key];
+  const body = document.getElementById('kpiDrawerBody');
+  if (!d || !body) return;
+  const head = `<div class="kpi-drawer-head">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div><div class="kpi-drawer-label">${esc(d.label)}</div>
+             <div class="kpi-drawer-value"${d.color ? ` style="color:${d.color}"` : ''}>${d.value}</div></div>
+        <button class="kpi-drawer-x" onclick="closeKpiDrawer()" title="Schliessen">×</button>
+      </div>
+      <div class="kpi-drawer-sub">${d.sub || ''}</div>
+    </div>`;
+  const inner = (d.sections && d.sections.length) ? d.sections.map(_kpiSectionHtml).join('') : '';
+  const foot = d.cta ? `<button class="btn btn-sm btn-primary kpi-drawer-cta" onclick='${d.cta}'>→ ${esc(d.tabLabel || 'zum Tab')}</button>` : '';
+  body.innerHTML = head + `<div class="kpi-drawer-scroll">${inner}</div>` + foot;
+}
+function kpiGoTab(tab) {
+  closeKpiDrawer();
+  if (typeof switchToTab === 'function') switchToTab(tab);
+}
+
+// ============ S3.5 — FAB (radialer Aktions-Fächer, Pattern aus ZFSG v4.0) ============
+function toggleFab() {
+  const root = document.getElementById('fabRoot');
+  const main = document.getElementById('fabMain');
+  const open = root.classList.toggle('open');
+  if (main) main.classList.toggle('open', open);
+}
+function closeFab() {
+  document.getElementById('fabRoot')?.classList.remove('open');
+  document.getElementById('fabMain')?.classList.remove('open');
+}
+function fabAction(which) {
+  closeFab();
+  if (which === 'transcript') openImportSwitchDialog();
+  else if (which === 'meeting') openMeetingModal();
+  else if (which === 'contact') openCrmModal();
+  else if (which === 'task') openTaskModal();
+  else if (which === 'time') { switchToTab('timetrack'); if (typeof setTtSub === 'function') setTtSub('erfassen'); }
+}
+document.addEventListener('click', (e) => {
+  const root = document.getElementById('fabRoot');
+  if (root && root.classList.contains('open') && !root.contains(e.target)) closeFab();
+});
+
 const PRIO_LABELS = { high: "Hoch", medium: "Mittel", low: "Niedrig" };
 const PRIO_PILLS = { high: "pill-pink", medium: "pill-muted", low: "pill-muted" };
 const STATUS_LABELS = {
@@ -4075,17 +4146,20 @@ function initFirebase() {
     STATE.projects = snap.val() || {};
     if (typeof renderResourcePlanning === 'function') renderResourcePlanning();
     if (typeof renderAuftragsRentabilitaet === 'function') renderAuftragsRentabilitaet();
+    if (typeof renderCockpit === 'function') renderCockpit();   // S3.5: KPI-Kachel C (Aufträge)
   });
   db.ref(ROOT_NODE + '/personCapacity').on("value", snap => {
     STATE.personCapacity = snap.val() || {};
     if (typeof renderResourcePlanning === 'function') renderResourcePlanning();
     if (typeof renderWeekloadCockpit === 'function') renderWeekloadCockpit();
+    if (typeof renderCockpit === 'function') renderCockpit();   // S3.5: KPI-Kachel B (Auslastung)
   });
   db.ref(ROOT_NODE + '/effortEstimates').on("value", snap => {
     STATE.effortEstimates = snap.val() || {};
     if (typeof renderResourcePlanning === 'function') renderResourcePlanning();
     if (typeof renderWeekloadCockpit === 'function') renderWeekloadCockpit();
     if (typeof renderAuftragsRentabilitaet === 'function') renderAuftragsRentabilitaet();
+    if (typeof renderCockpit === 'function') renderCockpit();   // S3.5: KPI-Kacheln B+C
   });
   db.ref(ROOT_NODE + '/appConfig').on("value", snap => {
     STATE.appConfig = snap.val() || { tagessoll: 8.4 };
@@ -4258,20 +4332,111 @@ function renderCockpit() {
     }
   });
 
-  document.getElementById("cockpitMetrics").innerHTML = `
-    <div class="metric"><div class="metric-label">Offene Aufgaben</div>
-      <div class="metric-value">${openTasks.length}</div>
-      <div class="metric-sub" ${overdue.length?'style="color:var(--app-danger)"':''}>${overdue.length} überfällig</div></div>
-    <div class="metric"><div class="metric-label">CRM Kontakte</div>
-      <div class="metric-value">${contacts.length}</div>
-      <div class="metric-sub">${inGespraech.length} in Gespräch/zugesagt</div></div>
-    <div class="metric"><div class="metric-label">Aktive Personen</div>
-      <div class="metric-value">${STATE.persons.length}</div>
-      <div class="metric-sub">Im Team</div></div>
-    <div class="metric"><div class="metric-label">Stunden ${now.toLocaleString("de",{month:"long"})}</div>
-      <div class="metric-value">${Math.round(monthHours)}h</div>
-      <div class="metric-sub">${STATE.persons.map(p=>`${p.slice(0,3)} ${Math.round(personHours[p]||0)}`).join(" · ")}</div></div>
-  `;
+  // ── S3.5 v0.3.0 — KPI-Kacheln mit Drilldown-Drawer (Pattern aus ZFSG v4.8/4.9) ──
+  const sortEntries = (o) => Object.entries(o).sort((a, b) => b[1] - a[1]);
+
+  // A: Aufgaben-Breakdowns
+  const inProgress = tasks.filter(t => t.status === 'in_progress').length;
+  const weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate() + 7);
+  const weekEndStr = weekEnd.toISOString().slice(0, 10);
+  const dueThisWeek = openTasks.filter(t => t.deadline && t.deadline >= today && t.deadline <= weekEndStr).length;
+  const kpiByPerson = {}, kpiByArea = {};
+  openTasks.forEach(t => {
+    ((t.persons && t.persons.length) ? t.persons : ['—']).forEach(p => { kpiByPerson[p] = (kpiByPerson[p] || 0) + 1; });
+    const a = t.area || '—'; kpiByArea[a] = (kpiByArea[a] || 0) + 1;
+  });
+
+  // B: Auslastung diese Woche (nutzt Personen-Kapazitäts-Modell aus v0.2.0)
+  const dh = getDailyHours();
+  const wkNow = ezWeekKeyOf(now);
+  const ymNow = ezMonthKeyOf(now);
+  const nWeeksNow = ezWeeksInMonth(ymNow).length || 4;
+  let teamSollD = 0, teamCapD = 0;
+  const persRows = (STATE.persons || []).map(p => {
+    const sollD = sumPersonWeekAll(p, wkNow) / dh;
+    const capT = personCapacityTotal(p, ymNow);
+    const capW = capT != null ? capT / nWeeksNow : null;
+    teamSollD += sollD;
+    if (capW != null) teamCapD += capW;
+    return { p: p, sollD: sollD, capW: capW };
+  });
+  const auslPct = teamCapD > 0 ? Math.round(teamSollD / teamCapD * 100) : 0;
+  const auslColor = auslPct > 110 ? 'var(--app-danger)' : auslPct > 90 ? '#E0A800' : 'var(--app-secondary)';
+
+  // C: Aufträge-Rentabilität (Geplant+Geleistet vs. Offeriert)
+  const auftragRows = Object.entries(STATE.projects || {})
+    .filter(([, p]) => p.type === 'auftrag')
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0))
+    .map(([id, p]) => {
+      const off = Number(p.offerierteTage) || 0;
+      const verbraucht = sumProjectAllWeeks(id) / dh
+        + Object.values(STATE.timeEntries || {}).filter(e => e && e.projectId === id)
+            .reduce((s, e) => s + (Number(e.hours) || 0), 0) / dh;
+      const pct = off > 0 ? Math.round(verbraucht / off * 100) : 0;
+      return { id: id, title: p.title, off: off, pct: pct };
+    });
+  const aufImPlan = auftragRows.filter(a => a.pct <= 80).length;
+  const aufEng = auftragRows.filter(a => a.pct > 80 && a.pct <= 100).length;
+  const aufUeber = auftragRows.filter(a => a.pct > 100).length;
+
+  // D: Stunden-Quellen
+  const hoursBySource = {};
+  Object.values(STATE.timeEntries || {}).forEach(e => {
+    if (e.date && e.date.startsWith(monthKey)) {
+      const src = e.source === 'clockify' ? 'Clockify (auto)' : 'Manuell';
+      hoursBySource[src] = (hoursBySource[src] || 0) + (parseFloat(e.hours) || 0) * ((e.persons || []).length || 1);
+    }
+  });
+
+  window.KPI_DATA = {
+    A: { label: 'Aufgaben', value: String(openTasks.length), color: overdue.length ? 'var(--app-danger)' : '',
+         tab: 'tasks', tabLabel: 'zum Aufgaben-Tab', cta: `kpiGoTab("tasks")`,
+         sub: `${inProgress} in Arbeit · ${dueThisWeek} diese Woche${overdue.length ? ` · ${overdue.length} überfällig` : ''}`,
+         sections: [
+           { title: 'Status', rows: [
+             { label: 'Offen gesamt', n: openTasks.length },
+             { label: 'In Arbeit', n: inProgress },
+             { label: 'Diese Woche fällig', n: dueThisWeek },
+             { label: 'Überfällig', n: overdue.length, danger: overdue.length > 0 }
+           ]},
+           { title: 'Nach Person', rows: sortEntries(kpiByPerson).map(([p, n]) => ({ label: p, n: n, bar: true })) },
+           { title: 'Nach Bereich', rows: sortEntries(kpiByArea).map(([a, n]) => ({ label: (typeof AREA_LABELS !== 'undefined' && AREA_LABELS[a]) || a, n: n, bar: true })) }
+         ] },
+    B: { label: 'Auslastung Woche', value: teamCapD > 0 ? `${auslPct}%` : '—', color: teamCapD > 0 ? auslColor : '',
+         tab: 'resourceplanning', tabLabel: 'zur Aufwandsplanung', cta: `kpiGoTab("resourceplanning")`,
+         sub: teamCapD > 0 ? `${ezRound2(teamSollD)} d geplant / ${ezRound2(teamCapD)} d Kapazität` : 'Kapazitäten noch nicht gepflegt',
+         sections: [
+           { title: 'Geplant diese Woche (Tage)', rows: persRows.filter(r => r.sollD > 0).sort((a, b) => b.sollD - a.sollD)
+               .map(r => ({ label: r.p, n: ezRound2(r.sollD), display: `${ezRound2(r.sollD)} d`, bar: true })) },
+           { title: 'Wochen-Kapazität vs. Plan', rows: persRows.filter(r => r.capW != null)
+               .map(r => ({ label: r.p, n: ezRound2(r.sollD), display: `${ezRound2(r.sollD)} / ${ezRound2(r.capW)} d`, danger: r.sollD > r.capW * 1.1 })) }
+         ] },
+    C: { label: 'Aufträge', value: String(auftragRows.length), color: aufUeber ? 'var(--app-danger)' : '',
+         tab: 'resourceplanning', tabLabel: 'zur Aufwandsplanung', cta: `kpiGoTab("resourceplanning")`,
+         sub: `${aufImPlan} im Plan · ${aufEng} eng${aufUeber ? ` · ${aufUeber} über Budget` : ''}`,
+         sections: [
+           { title: 'Budget-Verbrauch (geplant + geleistet vs. offeriert)', rows: auftragRows
+               .sort((a, b) => b.pct - a.pct)
+               .map(a => ({ label: a.title, n: a.pct, display: a.off > 0 ? `${a.pct}%` : 'kein Budget', bar: a.off > 0, danger: a.pct > 100 })) }
+         ] },
+    D: { label: `Stunden ${now.toLocaleString("de", { month: "long" })}`, value: `${Math.round(monthHours)}h`, color: '',
+         tab: 'timetrack', tabLabel: 'zur Arbeitszeit', cta: `kpiGoTab("timetrack")`,
+         sub: sortEntries(personHours).filter(([, h]) => h > 0).slice(0, 3).map(([p, h]) => `${p.slice(0, 8)} ${Math.round(h)}h`).join(' · ') || 'noch keine Einträge',
+         sections: [
+           { title: 'Nach Person', rows: sortEntries(personHours).filter(([, h]) => h > 0)
+               .map(([p, h]) => ({ label: p, n: Math.round(h), display: `${Math.round(h)}h`, bar: true })) },
+           { title: 'Nach Quelle', rows: sortEntries(hoursBySource)
+               .map(([s, h]) => ({ label: s, n: Math.round(h), display: `${Math.round(h)}h` })) }
+         ] }
+  };
+  document.getElementById("cockpitMetrics").innerHTML = ['A', 'B', 'C', 'D'].map(k => {
+    const d = window.KPI_DATA[k];
+    return `<div class="metric kpi-clickable" onclick="openKpiDrawer('${k}')" title="${esc(d.label)} — Details öffnen">
+      <span class="metric-chev">›</span>
+      <div class="metric-label">${esc(d.label)}</div>
+      <div class="metric-value"${d.color ? ` style="color:${d.color}"` : ''}>${d.value}</div>
+      <div class="metric-sub">${d.sub}</div></div>`;
+  }).join('');
 
   // Module cards
   const urgentTasks = openTasks.sort((a,b) => {
@@ -11152,6 +11317,21 @@ document.getElementById("ttDate").value = new Date().toISOString().slice(0,10);
 // runMigrations() lebt jetzt drinnen in bootApp() (mit den one-shot CRM-Migrationen + Lists-Defaults).
 auth.onAuthStateChanged(handleAuthChange);
 </script>
+<!-- FAB — radialer Aktions-Fächer (S3.5 v0.3.0, Pattern aus ZFSG v4.0) -->
+<div class="fab-root" id="fabRoot">
+  <div class="fab-item" data-i="1" onclick="fabAction('transcript')"><span class="fab-ico">📄</span><span class="fab-label">Transkript importieren</span></div>
+  <div class="fab-item" data-i="2" onclick="fabAction('meeting')"><span class="fab-ico">🗓️</span><span class="fab-label">Meeting erfassen</span></div>
+  <div class="fab-item" data-i="3" onclick="fabAction('contact')"><span class="fab-ico">👤</span><span class="fab-label">Neuer Kontakt</span></div>
+  <div class="fab-item" data-i="4" onclick="fabAction('time')"><span class="fab-ico">⏱</span><span class="fab-label">Zeit erfassen</span></div>
+  <div class="fab-item" data-i="5" onclick="fabAction('task')"><span class="fab-ico">✅</span><span class="fab-label">Neue Aufgabe</span></div>
+  <div class="fab-main" id="fabMain" onclick="toggleFab()" title="Aktionen">+</div>
+</div>
+
+<!-- KPI-DRAWER (S3.5 v0.3.0 — Drilldown hinter den Cockpit-Kacheln) -->
+<div id="kpiDrawerBackdrop" class="kpi-drawer-backdrop" onclick="if(event.target===this)closeKpiDrawer()">
+  <aside class="kpi-drawer"><div id="kpiDrawerBody" style="display:flex;flex-direction:column;height:100%"></div></aside>
+</div>
+
 <!-- FLOATING KI CO-LEAD BUBBLE -->
 <div class="frag-bubble" id="fragBubble" onclick="toggleFragPopover()" title="KI Co-Lead">🤖</div>
 <div class="frag-popover" id="fragPopover">
@@ -11197,7 +11377,7 @@ auth.onAuthStateChanged(handleAuthChange);
 </div>
 
 <div style="text-align:center;padding:12px 20px;font-size:10px;color:var(--app-text-muted);border-top:1px solid var(--app-border);margin-top:20px">
-  Expedition Zukunft · Cockpit · v0.2a.2026-06-10
+  Expedition Zukunft · Cockpit · v0.3.0.2026-06-11
 </div>
 </body>
 </html>

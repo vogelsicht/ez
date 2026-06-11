@@ -128,7 +128,7 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 
 - ✅ **worker.js deployed** (Osi, 2026-06-10) inkl. `FIREBASE_DB_SECRET` (neues dediziertes DB-Secret) + Cron-Trigger. Verifiziert via curl + Preview: `/clockify` 401-JSON ohne Key, CORS mit `X-Clockify-Key`, Anthropic-Proxy-Regression grün (400 von Anthropic = Pfad intakt), komplette Kette Frontend→Worker→Clockify mit Dummy-Key liefert die freundliche „Key ungültig"-Meldung.
 - **Clockify-E2E mit echtem Key** steht aus — die ganze Infrastruktur ist verifiziert, es fehlt nur noch der echte Wizard-Durchlauf (Salimata beim Preview-Call, oder Osi vorab mit eigenem Clockify-Test-Account).
-- **Salimata-Preview-Call** (BL-006): URL + Login teilen. Ihr Login ist im Personen-Mapping noch NICHT verknüpft — Osi: Settings → Personen-Mapping → `salimata@expeditionzukunft.ch` bei „Salimata" eintragen.
+- ✅ **Salimata-Mapping gesetzt** (S3.5-Smoke, 2026-06-11): Self-Claim-Flow als Salimata real durchlaufen — `personsData.Salimata.email` ist gesetzt, ihr Login matcht sofort und startet auf dem Aufwandsplanung-Tab. Preview-Call (BL-006) kann ohne weitere Vorbereitung stattfinden.
 - **Nur 2 von 9 Auth-Usern angelegt** (hello@oswaldkoenig.ch, salimata@). Rest vor Team-Rollout.
 - **Demo-Beispieldaten in der DB:** Salimata×Admin 1.0d/Juni + Notiz, Pascal×Sprint-MINT 0.5d/Wo, Salimata×VIS 0.25d/Wo, Sprint MINT offeriert=10d. Bewusst dringelassen als Demo-Material.
 

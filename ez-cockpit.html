@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="app-version" content="0.3.0.2026-06-11">
+<meta name="app-version" content="0.3a.2026-06-11">
 <title>Expedition Zukunft · Cockpit</title>
 
 <!-- Marken-Schrift (Darker Grotesque, via Google Fonts) -->
@@ -995,30 +995,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 .frag-clear-btn { font-size: 11px; padding: 4px 10px; border: 0.5px solid var(--app-border); border-radius: var(--app-radius); background: var(--app-card); color: var(--app-text-muted); cursor: pointer; }
 .frag-clear-btn:hover { color: var(--app-danger); border-color: var(--app-danger); }
 
-/* Floating Bubble */
-/* S3.5: Bubble rückt über den FAB (beide unten rechts gestapelt) */
-.frag-bubble { position: fixed; bottom: 90px; right: 24px; width: 52px; height: 52px; border-radius: 50%; background: var(--app-tertiary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.16); z-index: 999; transition: all 0.15s; user-select: none; }
-.frag-bubble:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(0,0,0,0.22); }
-.frag-bubble.has-unread::after { content: ''; position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; background: var(--app-secondary); border: 2px solid #fff; border-radius: 50%; }
-
-.frag-popover { position: fixed; bottom: 88px; right: 22px; width: 360px; max-width: calc(100vw - 44px); height: 520px; max-height: calc(100vh - 120px); background: var(--app-bg); border-radius: var(--app-radius-lg); box-shadow: 0 12px 32px rgba(0,0,0,0.18); z-index: 998; display: none; flex-direction: column; overflow: hidden; }
-.frag-popover.open { display: flex; }
-.frag-popover-header { padding: 12px 16px; background: var(--app-card); border-bottom: 0.5px solid var(--app-border); display: flex; justify-content: space-between; align-items: center; }
-.frag-popover-title { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-.frag-popover-actions { display: flex; gap: 4px; }
-.frag-popover-icon-btn { background: transparent; border: none; cursor: pointer; padding: 3px 6px; font-size: 13px; color: var(--app-text-muted); border-radius: 4px; }
-.frag-popover-icon-btn:hover { background: var(--app-bg-alt); color: var(--app-text); }
-.frag-popover-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-.frag-popover-footer { padding: 10px; border-top: 0.5px solid var(--app-border); background: var(--app-card); }
-.frag-popover .frag-msg-bubble { font-size: 12px; padding: 7px 11px; }
-.frag-popover .frag-msg-avatar { width: 22px; height: 22px; font-size: 10px; }
-.frag-popover .frag-input { font-size: 12px; min-height: 32px; padding: 6px 10px; }
-.frag-popover .frag-send { padding: 6px 12px; font-size: 12px; }
-
-@media (max-width: 768px) {
-  .frag-bubble { bottom: 14px; right: 14px; }
-  .frag-popover { bottom: 76px; right: 14px; left: 14px; width: auto; }
-}
+/* Floating Bubble + Popover entfernt in S3.6 — Co-Lead lebt im Sidebar-Tab, FAB ist der einzige Floating-Button. */
 /* === ENDE v3.8 === */
 
 /* === v3.10 Listen-UX Phase C: Inline-Add + Quick-Add-Popover === */
@@ -1432,7 +1409,6 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 .fab-item:hover .fab-label { opacity: 1; }
 @media (max-width: 768px) {
   .fab-root { bottom: 14px; right: 14px; }
-  .frag-bubble { bottom: 82px; right: 16px; }
 }
 
 /* === S3.5 v0.3.0 — KPI-Kacheln klickbar + Drawer (ZFSG-v4.8-Pattern) === */
@@ -1475,7 +1451,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
       <span style="color:var(--app-text-muted);margin-left:8px;font-weight:500">· Cockpit</span>
     </span>
     <div style="display:flex;gap:10px;align-items:center;margin-left:auto">
-      <button class="btn btn-sm" onclick="openImportSwitchDialog()" style="background:var(--app-tertiary);color:#fff;border-color:var(--app-tertiary)">📥 Importieren</button>
+      <!-- Importieren-Button entfernt in S3.6 — Transkript-Import lebt im FAB (und im Logbook-Tab) -->
       <span style="font-size:12px;color:var(--app-text-muted)" id="dateDisplay"></span>
     </div>
   </div>
@@ -1526,18 +1502,36 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 
 <!-- COCKPIT TAB -->
 <div class="tab-content active" id="tab-cockpit">
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div class="section-label" style="margin-bottom:0">Projektphasen</div>
-    <button class="btn btn-sm" onclick="openTimelineOverlay()" style="font-size:11px">&#x29C9; Planungsansicht</button>
-  </div>
-  <div class="timeline">
-    <svg id="cockpitTimelineSvg" width="100%" style="display:block"></svg>
-    <div class="tl-add-row">
-      <button class="btn btn-sm" onclick="openPhaseModal()">+ Phase</button>
-      <button class="btn btn-sm" style="color:var(--app-secondary);border-color:var(--app-secondary)" onclick="openMilestoneModal()">&#9670; Milestone</button>
-      <button class="btn btn-sm" style="color:var(--app-tertiary);border-color:var(--app-tertiary)" onclick="openStreamModal()">+ Stream</button>
+  <!-- S3.6: geteiltes Planungs-Fenster (Pattern aus ZFSG v4.1/v4.2) -->
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <span class="rp-toggle" style="font-weight:600">
+      <button id="planSecTimeline" data-active="true" onclick="planSetSection('timeline')">Projektphasen</button>
+      <button id="planSecPlan" data-active="false" onclick="planSetSection('plan')">Wochen-Planung</button>
+    </span>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span id="planNavBtns" style="display:none;gap:6px;align-items:center">
+        <button class="btn btn-sm" onclick="planShift(-8)" title="8 Wochen zurück">«</button>
+        <button class="btn btn-sm" onclick="planResetView()" title="auf heute zentrieren">Heute</button>
+        <button class="btn btn-sm" onclick="planShift(8)" title="8 Wochen vor">»</button>
+        <span class="rp-toggle">
+          <button id="planUnitH" onclick="planSetUnit('stunden')">h</button>
+          <button id="planUnitD" onclick="planSetUnit('tage')">d</button>
+        </span>
+      </span>
+      <button class="btn btn-sm" onclick="openTimelineOverlay()" style="font-size:11px">&#x29C9; Planungsansicht</button>
     </div>
   </div>
+  <div id="cockpitTimelineWrap">
+    <div class="timeline">
+      <svg id="cockpitTimelineSvg" width="100%" style="display:block"></svg>
+      <div class="tl-add-row">
+        <button class="btn btn-sm" onclick="openPhaseModal()">+ Phase</button>
+        <button class="btn btn-sm" style="color:var(--app-secondary);border-color:var(--app-secondary)" onclick="openMilestoneModal()">&#9670; Milestone</button>
+        <button class="btn btn-sm" style="color:var(--app-tertiary);border-color:var(--app-tertiary)" onclick="openStreamModal()">+ Stream</button>
+      </div>
+    </div>
+  </div>
+  <div id="cockpitWeekPlan" style="margin-top:8px;display:none"></div>
   <div id="tlTooltip" style="position:absolute;display:none;background:var(--app-text-strong);color:#fff;padding:8px 12px;border-radius:6px;font-size:11px;line-height:1.5;pointer-events:none;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:260px"></div>
   <div class="metrics" id="cockpitMetrics"></div>
   <div class="section-label">Auf einen Blick</div>
@@ -2385,7 +2379,7 @@ table.tt .deadline.overdue { color: var(--app-danger); font-weight: 500; }
 //
 const APP_BRAND  = "Expedition Zukunft";   // Wird im Header und in JSON-Export verwendet
 const APP_SLUG   = "ez";                    // Filename-Prefix für CSV/JSON-Exporte
-const APP_VERSION = "0.3.0.2026-06-11";      // Wird im Footer angezeigt
+const APP_VERSION = "0.3a.2026-06-11";       // Wird im Footer angezeigt
 const ROOT_NODE  = "ezcockpit";             // Firebase root-Knoten (alle Daten leben hier drunter)
 const LEGACY_TIME_NODE = "ezarbeitsjournal";// Firebase root für Time-Tracking (separat, für künftige Migration)
 
@@ -3977,6 +3971,154 @@ document.addEventListener('click', (e) => {
   if (root && root.classList.contains('open') && !root.contains(e.target)) closeFab();
 });
 
+// ============ S3.6 — COCKPIT WOCHEN-PLANUNG (Pattern aus ZFSG v4.1 renderCockpitWeekBudget) ============
+// Geteiltes Planungs-Fenster im Cockpit: Projektphasen-Timeline ODER horizontal scrollbares
+// Wochen-Grid (Projekte × KW, Zellen = Σ über alle Personen aus effortEstimates).
+// Read-only Vogelsicht — editiert wird in der Aufwandsplanung; Zell-Klick springt dorthin.
+let PLAN_VIEW = {
+  offset: -2,            // Wochen relativ zur aktuellen KW (Fensterstart)
+  weeks: 20,
+  section: (() => { try { return localStorage.getItem('ez_planSection') === 'plan' ? 'plan' : 'timeline'; } catch(e) { return 'timeline'; } })()
+};
+const PLAN_LABELW = 180, PLAN_TAILW = 70;
+function planGridCols(n) { return PLAN_LABELW + 'px repeat(' + n + ', minmax(44px,1fr)) ' + PLAN_TAILW + 'px'; }
+function planMinWidth(n) { return PLAN_LABELW + n * 46 + PLAN_TAILW; }
+function ezPlanWeeks() {
+  const todayKey = ezWeekKeyOf(new Date());
+  const start = ezKeyToDate(todayKey);
+  start.setDate(start.getDate() + PLAN_VIEW.offset * 7);
+  const out = [];
+  for (let i = 0; i < PLAN_VIEW.weeks; i++) {
+    const m = new Date(start); m.setDate(m.getDate() + i * 7);
+    const key = ezDateToKey(m);
+    out.push({ key: key, num: ezIsoWeekNum(m), label: m.getDate() + '.' + (m.getMonth() + 1) + '.', today: key === todayKey });
+  }
+  return out;
+}
+function planShift(n) { PLAN_VIEW.offset += n; renderCockpitWeekPlan(); }
+function planResetView() { PLAN_VIEW.offset = -2; renderCockpitWeekPlan(); }
+function planSetUnit(u) {
+  // Einheit ist mit der Aufwandsplanung geteilt (rpState.unit) — DP4-Konsistenz.
+  if (u !== rpState.unit) { rpState.unit = u; rpPersist(); renderResourcePlanning(); }
+  renderCockpitWeekPlan();
+}
+function planSetSection(s) {
+  PLAN_VIEW.section = s;
+  try { localStorage.setItem('ez_planSection', s); } catch(e) {}
+  _applyPlanSection();
+  if (s === 'plan') renderCockpitWeekPlan();
+}
+function _applyPlanSection() {
+  const isPlan = PLAN_VIEW.section === 'plan';
+  const tl = document.getElementById('cockpitTimelineWrap');
+  const wp = document.getElementById('cockpitWeekPlan');
+  const nav = document.getElementById('planNavBtns');
+  if (tl) tl.style.display = isPlan ? 'none' : 'block';
+  if (wp) wp.style.display = isPlan ? 'block' : 'none';
+  if (nav) nav.style.display = isPlan ? 'inline-flex' : 'none';
+  document.getElementById('planSecTimeline')?.setAttribute('data-active', String(!isPlan));
+  document.getElementById('planSecPlan')?.setAttribute('data-active', String(isPlan));
+}
+function sumProjectWeekAll(projectId, weekKey) {
+  let s = 0;
+  Object.values(STATE.effortEstimates || {}).forEach(weeks => {
+    const v = weeks && weeks[weekKey] ? weeks[weekKey][projectId] : null;
+    if (v) s += Number(v.hours) || 0;
+  });
+  return s;
+}
+function teamCapacityForWeek(weekKey) {
+  // Team-Kapazität der Woche in Tagen: Monats-Kapazität jeder Person / Wochen im Monat
+  const ym = ezMonthKeyOf(ezKeyToDate(weekKey));
+  const n = ezWeeksInMonth(ym).length || 4;
+  let cap = 0, has = false;
+  (STATE.persons || []).forEach(p => {
+    const t = personCapacityTotal(p, ym);
+    if (t != null) { cap += t / n; has = true; }
+  });
+  return has ? cap : null;
+}
+function planJumpToWeek(weekKey) {
+  rpState.view = 'woche'; rpState.weekKey = weekKey; rpPersist();
+  switchToTab('resourceplanning');
+  renderResourcePlanning();
+}
+function renderCockpitWeekPlan() {
+  const el = document.getElementById('cockpitWeekPlan');
+  if (!el || PLAN_VIEW.section !== 'plan') return;
+  // Unit-Toggle-Status nachführen
+  document.getElementById('planUnitH')?.setAttribute('data-active', String(rpState.unit === 'stunden'));
+  document.getElementById('planUnitD')?.setAttribute('data-active', String(rpState.unit === 'tage'));
+
+  const projects = cwBookableProjects();
+  if (!projects.length) {
+    el.innerHTML = '<div class="rp-empty-state">Noch keine Projekte — in der Aufwandsplanung anlegen.</div>';
+    return;
+  }
+  const dh = getDailyHours();
+  const isDays = rpState.unit === 'tage';
+  const disp = (h) => { if (!h) return ''; return isDays ? Math.round(h / dh * 10) / 10 : Math.round(h * 10) / 10; };
+  const weeks = ezPlanWeeks();
+  const n = weeks.length;
+  const cols = planGridCols(n);
+  const cellBorder = 'border-left:0.5px solid var(--app-border)';
+  const todayTint = 'background:#EAF6EF';
+  const headCell = 'padding:6px 3px;font-size:11px;color:var(--app-text);font-weight:600;text-align:center;border-bottom:1px solid var(--app-border);line-height:1.35';
+  const stickyCard = 'position:sticky;left:0;z-index:15;background:#fff';
+  const stickyAlt = 'position:sticky;left:0;z-index:15;background:var(--app-bg-alt)';
+
+  let head = `<div style="grid-column:1;${headCell};${stickyAlt};text-align:left;padding-left:10px">Projekt</div>`;
+  weeks.forEach((w, i) => {
+    head += `<div style="grid-column:${2 + i};${headCell};${cellBorder}${w.today ? ';' + todayTint + ';border-left:2px solid var(--app-secondary)' : ''}">KW${w.num}<br>${w.label}</div>`;
+  });
+  head += `<div style="grid-column:${2 + n};${headCell};text-align:right;padding-right:8px;color:var(--app-secondary)">Σ ${isDays ? 'd' : 'h'}</div>`;
+
+  const weekTotals = {};
+  weeks.forEach(w => weekTotals[w.key] = 0);
+  let rows = '';
+  let currentGroup = null;
+  projects.forEach(p => {
+    if (p.group !== currentGroup) {
+      currentGroup = p.group;
+      rows += `<div style="display:grid;grid-template-columns:${cols};border-top:0.5px solid var(--app-border);background:var(--app-bg-alt)">
+        <div style="grid-column:1 / span ${n + 2};${stickyAlt};font-size:10px;font-weight:600;color:var(--app-text-muted);text-transform:uppercase;letter-spacing:0.5px;padding:5px 10px">${esc(currentGroup)}</div></div>`;
+    }
+    let rowSumH = 0;
+    let cells = `<div onclick="planJumpToWeek('${weeks[0].key}')" title="${esc(p.title)} — in der Aufwandsplanung öffnen" style="grid-column:1;${stickyCard};font-size:12px;padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer">${esc(p.title)}</div>`;
+    weeks.forEach((w, i) => {
+      const h = sumProjectWeekAll(p.id, w.key);
+      rowSumH += h; weekTotals[w.key] += h;
+      cells += `<div onclick="planJumpToWeek('${w.key}')" title="KW${w.num} in der Aufwandsplanung öffnen" style="grid-column:${2 + i};${cellBorder}${w.today ? ';' + todayTint : ''};padding:4px 1px;text-align:center;font-size:11px;cursor:pointer">${disp(h)}</div>`;
+    });
+    cells += `<div style="grid-column:${2 + n};text-align:right;padding:4px 8px;font-weight:600;color:var(--app-secondary)">${rowSumH ? disp(rowSumH) : ''}</div>`;
+    rows += `<div class="plan-row" style="display:grid;grid-template-columns:${cols};border-top:0.5px solid var(--app-border);align-items:center">${cells}</div>`;
+  });
+
+  // Σ Team / Woche + Kapazität / Woche (rot wenn Soll > Kapazität)
+  const grandH = Object.values(weekTotals).reduce((a, b) => a + b, 0);
+  let totalRow = `<div style="grid-column:1;${stickyAlt};padding:5px 10px;font-weight:600">Σ Team / Woche</div>`;
+  let capRow = `<div style="grid-column:1;${stickyAlt};padding:5px 10px;font-weight:600;color:var(--app-text-muted)">Kapazität / Woche</div>`;
+  weeks.forEach((w, i) => {
+    const sollH = weekTotals[w.key];
+    const capD = teamCapacityForWeek(w.key);
+    const over = capD != null && sollH / dh > capD * 1.001;
+    totalRow += `<div style="grid-column:${2 + i};${cellBorder}${w.today ? ';' + todayTint : ''};text-align:center;font-size:11px;font-weight:600;padding:5px 1px${over ? ';color:var(--app-danger)' : ''}">${sollH ? disp(sollH) : ''}</div>`;
+    capRow += `<div style="grid-column:${2 + i};${cellBorder}${w.today ? ';' + todayTint : ''};text-align:center;font-size:11px;color:var(--app-text-muted);padding:5px 1px">${capD != null ? (isDays ? Math.round(capD * 10) / 10 : Math.round(capD * dh * 10) / 10) : '—'}</div>`;
+  });
+  totalRow += `<div style="grid-column:${2 + n};text-align:right;padding:5px 8px;font-weight:600;color:var(--app-secondary)">${grandH ? disp(grandH) : ''}</div>`;
+  capRow += `<div style="grid-column:${2 + n}"></div>`;
+
+  el.innerHTML = `
+    <div style="overflow-x:auto;border:1px solid var(--app-border);border-radius:var(--app-radius);background:#fff">
+      <div style="display:grid;grid-template-columns:${cols};min-width:${planMinWidth(n)}px;background:var(--app-bg-alt)">${head}</div>
+      <div style="min-width:${planMinWidth(n)}px">${rows}
+        <div style="display:grid;grid-template-columns:${cols};border-top:2px solid var(--app-secondary);background:var(--app-bg-alt)">${totalRow}</div>
+        <div style="display:grid;grid-template-columns:${cols};border-top:0.5px solid var(--app-border);background:var(--app-bg-alt)">${capRow}</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--app-text-muted);margin-top:4px">${isDays ? 'Tage' : 'Stunden'} pro Woche, summiert über alle Personen · Klick auf eine Zelle öffnet die Woche in der Aufwandsplanung · Tagessoll ${dh}h</div>`;
+}
+
 const PRIO_LABELS = { high: "Hoch", medium: "Mittel", low: "Niedrig" };
 const PRIO_PILLS = { high: "pill-pink", medium: "pill-muted", low: "pill-muted" };
 const STATUS_LABELS = {
@@ -4437,6 +4579,10 @@ function renderCockpit() {
       <div class="metric-value"${d.color ? ` style="color:${d.color}"` : ''}>${d.value}</div>
       <div class="metric-sub">${d.sub}</div></div>`;
   }).join('');
+
+  // S3.6: geteiltes Planungs-Fenster (Timeline vs. Wochen-Planung) synchron halten
+  if (typeof _applyPlanSection === 'function') _applyPlanSection();
+  if (typeof renderCockpitWeekPlan === 'function') renderCockpitWeekPlan();
 
   // Module cards
   const urgentTasks = openTasks.sort((a,b) => {
@@ -10764,21 +10910,7 @@ function handleFragKeydown(ev, mode) {
   }
 }
 
-function toggleFragPopover() {
-  const pop = document.getElementById('fragPopover');
-  if (!pop) return;
-  pop.classList.toggle('open');
-  if (pop.classList.contains('open')) {
-    renderFragMessages('bubble');
-    renderFragSuggestions();
-    setTimeout(() => document.getElementById('fragInputBubble')?.focus(), 80);
-  }
-}
-
-function openFragInTab() {
-  document.querySelector('.nav-tab[data-tab="frag"]')?.click();
-  document.getElementById('fragPopover')?.classList.remove('open');
-}
+// toggleFragPopover + openFragInTab entfernt in S3.6 (Bubble/Popover weg, A3).
 
 // ============ Context-Builder ============
 // Sammelt einen kompakten Snapshot der Cockpit-Daten als Text für den System-Prompt
@@ -11181,9 +11313,8 @@ function renderFragSuggestions() {
 }
 
 function useFragSuggestion(text) {
-  const isPopoverOpen = document.getElementById('fragPopover')?.classList.contains('open');
-  const inputId = isPopoverOpen ? 'fragInputBubble' : 'fragInputFull';
-  const input = document.getElementById(inputId);
+  // S3.6: Popover entfernt — Suggestions gibt's nur noch im Full-Tab
+  const input = document.getElementById('fragInputFull');
   if (input) {
     input.value = text;
     input.focus();
@@ -11332,25 +11463,8 @@ auth.onAuthStateChanged(handleAuthChange);
   <aside class="kpi-drawer"><div id="kpiDrawerBody" style="display:flex;flex-direction:column;height:100%"></div></aside>
 </div>
 
-<!-- FLOATING KI CO-LEAD BUBBLE -->
-<div class="frag-bubble" id="fragBubble" onclick="toggleFragPopover()" title="KI Co-Lead">🤖</div>
-<div class="frag-popover" id="fragPopover">
-  <div class="frag-popover-header">
-    <div class="frag-popover-title">🤖 KI Co-Lead</div>
-    <div class="frag-popover-actions">
-      <button class="frag-popover-icon-btn" onclick="clearFragHistory('bubble')" title="Verlauf zurücksetzen">↺</button>
-      <button class="frag-popover-icon-btn" onclick="openFragInTab()" title="In großem Tab öffnen">⛶</button>
-      <button class="frag-popover-icon-btn" onclick="toggleFragPopover()" title="Schliessen">×</button>
-    </div>
-  </div>
-  <div class="frag-popover-body" id="fragMessagesBubble"></div>
-  <div class="frag-popover-footer">
-    <div class="frag-input-row" style="border-top:none;padding-top:0">
-      <textarea class="frag-input" id="fragInputBubble" placeholder="Schnell fragen..." rows="1" oninput="autoGrowTextarea(this)" onkeydown="handleFragKeydown(event,'bubble')"></textarea>
-      <button class="frag-send" onclick="sendFragMessage('bubble')" id="fragSendBubble">Senden</button>
-    </div>
-  </div>
-</div>
+<!-- Co-Lead-Bubble + Popover entfernt in S3.6 (Osi-Wunsch) — Co-Lead lebt im Sidebar-Tab.
+     Die 'bubble'-Mode-Pfade in den generischen Frag-Funktionen sind defensiv (Element fehlt → no-op). -->
 
 <!-- TimeEntry Edit-Modal -->
 <div class="modal-overlay" id="timeEntryModal">
@@ -11377,7 +11491,7 @@ auth.onAuthStateChanged(handleAuthChange);
 </div>
 
 <div style="text-align:center;padding:12px 20px;font-size:10px;color:var(--app-text-muted);border-top:1px solid var(--app-border);margin-top:20px">
-  Expedition Zukunft · Cockpit · v0.3.0.2026-06-11
+  Expedition Zukunft · Cockpit · v0.3a.2026-06-11
 </div>
 </body>
 </html>

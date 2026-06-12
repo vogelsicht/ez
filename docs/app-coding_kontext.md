@@ -163,7 +163,7 @@ Aus der Übergabe identifiziert (relativ zu ~9.500 Zeilen Total):
 |---|---|---|---|
 | **S0** | **2026-05-20** | 0.1.0 (Übergabe-Stand) | **Bootstrap (kein Code-Patch) · app-coding_kontext initialisiert · Erster Code-Lauf wartet auf S1 (Repo-Init + Firebase + Worker + Config-Replace + Seed-Data)** |
 | **S1** | **2026-05-21** | 0.1.0 → 0.1a → 0.1b.2026-05-21 | **Setup-Patch (firebaseConfig + ANTHROPIC_PROXY_URL + Versions-Bump) → live deployed. BUG-001 Quickfix (Identity-Modal Empty-State Onboarding via Inline-Add). 4 Strategie-Themen für Phase-B-Discovery eskaliert.** |
-| **S3** | **2026-06-06–10** | 0.1b → 0.2.0 → 0.2a.2026-06-10 | **Briefing S2 beide Etappen (5 Pushes): S3.1 Auth + Login + Settings; S3.1.1 Toasts/Fixes; S3.1.2 Account-Popover; S3.2+S3.3 Pivot + EZ-Seed + Cockpit-Monitoring (v0.2.0); S3.4 Clockify-Self-Service-Wizard + worker.js mit /clockify + Cron (v0.2a, Onboarding-Variante per Osi-Entscheid). DB-Rules `auth != null`. Offen: worker.js-Deploy + E2E.** |
+| **S3** | **2026-06-06–11** | 0.1b → 0.2.0 → 0.2a → 0.3.0 → 0.3a.2026-06-11 | **Briefing S2 beide Etappen + 2 Osi-Feedback-Runden (7 Pushes): S3.1–S3.1.2 Auth + Login + Settings + UX-Fixes; S3.2+S3.3 Pivot + EZ-Seed + Cockpit-Monitoring (v0.2.0); S3.4 Clockify-Wizard + worker.js (v0.2a, deployed + verifiziert); S3.5 KPI-Drawer-Cockpit + FAB + Self-Claim (v0.3.0, Salimata-Mapping erledigt); S3.6 Cockpit-Wochen-Planung (ZFSG-Grid, scrollbar) + Bubble/Header-Import raus (v0.3a). DB-Rules `auth != null`.** |
 
 ---
 

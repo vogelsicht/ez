@@ -31,7 +31,7 @@ Plus **Inbox-Workflow** für Transkript-Import (Meeting → LLM → strukturiert
 
 | File | Version | Zuletzt geändert | Status |
 |---|---|---|---|
-| `ez-cockpit.html` | `0.3.0.2026-06-11` | 2026-06-11 (S3) | live: Auth + Self-Claim, Settings, Pivot, Clockify-Wizard, KPI-Cockpit mit Drilldown-Drawer, FAB. Salimata-Mapping gesetzt |
+| `ez-cockpit.html` | `0.3a.2026-06-11` | 2026-06-11 (S3) | live: Auth + Self-Claim, Settings, Pivot, Clockify-Wizard, KPI-Cockpit mit Drilldown-Drawer, FAB, Cockpit-Wochen-Planung (scrollbares KW-Grid). Co-Lead nur noch als Tab |
 | `worker.js` | v0.2a | 2026-06-10 (S3, deployed von Osi) | ✅ live auf `vogelsicht-ez.holy-forest-0174.workers.dev`: Anthropic-Proxy (Regression-getestet) + `/clockify/*` + Cron `0 */2 * * *` mit `FIREBASE_DB_SECRET` gesetzt |
 
 ---
@@ -321,6 +321,7 @@ Siehe `PROJEKT_ANWEISUNGEN.md` §15. Kurzfassung: in Phase A reicht B6-Check als
 | 0.2.0.2026-06-10 | 2026-06-10 | S3 Etappe 1 (Briefing S2): Firebase Auth E-Mail/Passwort als Login-Gate, Login-Screen, Settings-Tab (Tagessoll in `appConfig` per A14, Personen-E-Mail-Mapping, Seed-Button), Account-Popover, Toast-System, Aufwandsplanung-Pivot (Person × Kategorie × Woche/Monat, Kapazitäts-Block, Notizen, kollabierbare Kategorien), EZ-Seed (9 Personen / 26 Projekte / Kapazität Mai+Juni), Cockpit: Auslastung diese Woche + Auftrags-Rentabilität. Identity-Modal entfernt. DB-Rules `auth != null`. |
 | 0.2a.2026-06-10 | 2026-06-10 | S3 Etappe 2 (Onboarding-Variante): Clockify-Self-Service-Wizard (Key-Anleitung + Live-Test + Auto-Match Personen/Projekte + Sofort-Sync + 🎉-Screen), Manual-Sync (14 Tage, Dedupe via `clockifyEntryId`), Settings-Clockify-Sektion, TimeEntry-Projekt-Dropdown, Rentabilitäts-Hint. `worker.js` neu im Repo (Anthropic-Proxy + `/clockify/*` + Cron alle 2h). Key in `clockifyConfig` (Phase-A-Tradeoff → BL-016). |
 | 0.3.0.2026-06-11 | 2026-06-11 | S3.5 (ZFSG-v4-Patterns adaptiert): KPI-Kacheln mit Drilldown-Drawer ersetzen statische Cockpit-Metriken (Aufgaben / Auslastung Woche aus Personen-Kapazitäts-Modell / Aufträge-Budget-Verbrauch / Stunden mit Clockify-Quelle), FAB-Aktions-Fächer (5 Aktionen, Co-Lead-Bubble darüber), Self-Claim für Login↔Person-Verknüpfung (ersetzt Osi-manuelles Mapping), Seed-UI entfernt (A3). |
+| 0.3a.2026-06-11 | 2026-06-11 | S3.6 (Osi-Feedback): Cockpit-Wochen-Planung als geteiltes Planungs-Fenster nach ZFSG v4.1 — Section-Toggle [Projektphasen \| Wochen-Planung], 20-KW-Grid horizontal scrollbar mit sticky erster Spalte, Zellen = Team-Σ pro Projekt×Woche (read-only, Klick → Aufwandsplanung), Σ-Team- + Kapazitäts-Zeile, «/Heute/»-Nav + h/d-Toggle. Co-Lead-Bubble + Popover entfernt (Co-Lead nur Sidebar-Tab, FAB einziger Floating-Button). Header-Importieren-Button entfernt (lebt im FAB + Logbook). |
 
 ---
 
